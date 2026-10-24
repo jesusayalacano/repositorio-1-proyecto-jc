@@ -1,0 +1,57 @@
+[
+  {
+    "id": "prod-balon-oficial",
+    "nombre": "Balón de Baloncesto",
+    "descripcion": "Balón oficial de cuero sintético, ideal para exteriores.",
+    "precio": 120000,
+    "categoria": "balones",
+    "stock": 25,
+    "imagen": "images/balon.webp",
+    "etiqueta": "Más vendido",
+    "creadoEn": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "prod-zapatos-alto-rendimiento",
+    "nombre": "Zapatos de Alto Rendimiento",
+    "descripcion": "Amortiguación superior y agarre para cambios de dirección rápidos.",
+    "precio": 350000,
+    "categoria": "zapatillas",
+    "stock": 12,
+    "imagen": "images/zapatos.jpg",
+    "etiqueta": "Nuevo",
+    "creadoEn": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "prod-camisa-nba",
+    "nombre": "Camisas Oficiales de la NBA",
+    "descripcion": "Camisetas originales de tus equipos y jugadores favoritos.",
+    "precio": 180000,
+    "categoria": "camisetas",
+    "stock": 18,
+    "imagen": "images/camisa-nba.avif",
+    "etiqueta": "",
+    "creadoEn": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "prod-accesorios-entrenamiento",
+    "nombre": "Accesorios de Entrenamiento",
+    "descripcion": "Bandas, conos y equipo para mejorar tu rendimiento.",
+    "precio": 45000,
+    "categoria": "accesorios",
+    "stock": 40,
+    "imagen": "images/accesorio.jpg",
+    "etiqueta": "",
+    "creadoEn": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "prod-tableros-portatiles",
+    "nombre": "Tableros Portátiles",
+    "descripcion": "Fáciles de instalar, ideales para casa o entrenamiento.",
+    "precio": 600000,
+    "categoria": "tableros",
+    "stock": 7,
+    "imagen": "images/tableros.jpg",
+    "etiqueta": "",
+    "creadoEn": "2026-01-01T00:00:00.000Z"
+  }
+]

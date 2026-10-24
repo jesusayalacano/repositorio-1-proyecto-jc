@@ -1,0 +1,26 @@
+{
+  "name": "dunk-labs-server",
+  "version": "1.0.0",
+  "description": "Backend y servidor estático de dunk labs",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "dunk-labs",
+    "express",
+    "api"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
