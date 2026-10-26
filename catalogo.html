@@ -75,6 +75,31 @@
         <p class="footer-copy">&copy; 2026 dunk labs. Todos los derechos reservados.</p>
     </footer>
 
+    <button class="carrito-flotante" id="abrir-carrito" type="button" aria-haspopup="dialog">
+        Carrito
+        <span id="carrito-contador" class="carrito-contador">0</span>
+    </button>
+
+    <p id="aviso-carrito" class="aviso-carrito" role="status"></p>
+
+    <dialog id="carrito" class="carrito" aria-labelledby="carrito-titulo">
+        <div class="carrito-cabecera">
+            <h2 id="carrito-titulo">Tu carrito</h2>
+            <button class="carrito-cerrar" id="cerrar-carrito" type="button">Cerrar</button>
+        </div>
+
+        <p id="carrito-vacio" class="carrito-vacio">Todavía no has agregado nada.</p>
+        <ul id="carrito-items" class="carrito-items"></ul>
+
+        <div id="carrito-resumen" class="carrito-resumen" hidden>
+            <p class="carrito-total">Total <strong id="carrito-total">$0</strong></p>
+            <div class="carrito-acciones">
+                <button id="vaciar-carrito" type="button" class="btn-secundario">Vaciar carrito</button>
+                <button id="seguir-comprando" type="button" class="btn-primario">Seguir comprando</button>
+            </div>
+        </div>
+    </dialog>
+
     <template id="plantilla-producto">
         <article class="tarjeta-producto">
             <span class="etiqueta" hidden></span>
@@ -84,6 +109,22 @@
             <p class="precio"></p>
             <button class="btn-agregar" type="button">Añadir al carrito</button>
         </article>
+    </template>
+
+    <template id="plantilla-carrito">
+        <li class="carrito-item">
+            <img alt="">
+            <div class="carrito-item-info">
+                <p class="carrito-item-nombre"></p>
+                <p class="carrito-item-precio"></p>
+                <div class="carrito-cantidad">
+                    <button type="button" data-accion="menos" aria-label="Quitar una unidad">-</button>
+                    <span class="carrito-item-cantidad"></span>
+                    <button type="button" data-accion="mas" aria-label="Agregar una unidad">+</button>
+                </div>
+            </div>
+            <button type="button" class="carrito-eliminar" data-accion="eliminar" aria-label="Eliminar producto">×</button>
+        </li>
     </template>
 
     <script src="js/catalogo.js" defer></script>
