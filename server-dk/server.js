@@ -24,7 +24,7 @@ const ARCHIVO_PRODUCTOS = path.join(DATA_DIR, 'productos.json');
 const ARCHIVO_PEDIDOS = path.join(DATA_DIR, 'pedidos.json');
 const ARCHIVO_MENSAJES = path.join(DATA_DIR, 'mensajes.json');
 
-const CATEGORIAS = ['balones', 'zapatillas', 'camisetas', 'accesorios', 'tableros'];
+const CATEGORIAS = ['balones', 'zapatillas', 'camisetas', 'mochilas', 'accesorios', 'tableros'];
 
 /* ------------------------------------------------------------------ */
 /* Utilidades                                                          */
@@ -117,6 +117,8 @@ app.use(
 app.get('/styles.css', (req, res) => {
   res.sendFile(path.join(ROOT, 'styles.css'));
 });
+
+app.use('/js', express.static(path.join(ROOT, 'js'), { maxAge: '1h' }));
 
 app.get(['/', '/index.html'], (req, res) => {
   res.sendFile(path.join(ROOT, 'index.html'));
