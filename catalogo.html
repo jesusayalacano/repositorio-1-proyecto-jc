@@ -93,11 +93,26 @@
 
         <div id="carrito-resumen" class="carrito-resumen" hidden>
             <p class="carrito-total">Total <strong id="carrito-total">$0</strong></p>
+
+            <form id="form-pedido" class="form-pedido">
+                <h3>Datos para la entrega</h3>
+                <div class="form-grid">
+                    <label>Nombre<input name="nombre" autocomplete="name" required minlength="3"></label>
+                    <label>Correo<input name="email" type="email" autocomplete="email" required></label>
+                    <label>Teléfono<input name="telefono" type="tel" autocomplete="tel" required></label>
+                    <label>Dirección<input name="direccion" autocomplete="street-address" required></label>
+                </div>
+                <button id="boton-pedido" type="submit" class="btn-primario">Hacer pedido</button>
+                <p class="form-nota">Te contactamos para confirmar el pago y el envío.</p>
+            </form>
+
             <div class="carrito-acciones">
                 <button id="vaciar-carrito" type="button" class="btn-secundario">Vaciar carrito</button>
                 <button id="seguir-comprando" type="button" class="btn-primario">Seguir comprando</button>
             </div>
         </div>
+
+        <p id="pedido-estado" class="carrito-estado" role="status"></p>
     </dialog>
 
     <template id="plantilla-producto">

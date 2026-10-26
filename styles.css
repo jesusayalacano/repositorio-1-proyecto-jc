@@ -334,6 +334,7 @@ footer[id] {
 
 .btn-secundario {
     border: 1px solid var(--line-accent);
+    background: transparent;
     color: var(--text);
 }
 
@@ -770,8 +771,12 @@ body.carrito-abierto {
 }
 
 .carrito {
+    position: fixed;
+    inset: 0;
     width: min(480px, calc(100vw - 2rem));
+    height: fit-content;
     max-height: 86vh;
+    margin: auto;
     padding: 1.35rem;
     overflow-y: auto;
     border: 1px solid var(--line);
@@ -938,6 +943,66 @@ body.carrito-abierto {
     font-size: 1.6rem;
     font-weight: 400;
     letter-spacing: 0.03em;
+}
+
+.form-pedido {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+}
+
+.form-pedido h3 {
+    margin-bottom: 0.7rem;
+    font-family: var(--display);
+    font-size: 1.35rem;
+    font-weight: 400;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+}
+
+.form-grid label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    color: var(--muted);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.form-grid input {
+    padding: 0.55rem 0.6rem;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--surface-2);
+    color: var(--text);
+    font: inherit;
+    font-size: 0.85rem;
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+.form-grid input:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+.form-pedido .btn-primario {
+    width: 100%;
+    margin-top: 0.8rem;
+}
+
+.form-nota {
+    margin-top: 0.5rem;
+    color: var(--muted);
+    font-size: 0.72rem;
 }
 
 .carrito-acciones {
@@ -1168,8 +1233,13 @@ footer {
         padding: 1rem;
     }
 
-    .carrito-acciones {
+    .carrito-acciones,
+    .form-grid {
         grid-template-columns: 1fr;
+    }
+
+    .form-grid input {
+        font-size: 1rem;
     }
 
     .carrito-flotante {

@@ -17,6 +17,9 @@ const carritoResumen = document.querySelector('#carrito-resumen');
 const totalCarrito = document.querySelector('#carrito-total');
 const avisoCarrito = document.querySelector('#aviso-carrito');
 const plantillaCarrito = document.querySelector('#plantilla-carrito');
+const formPedido = document.querySelector('#form-pedido');
+const botonPedido = document.querySelector('#boton-pedido');
+const pedidoEstado = document.querySelector('#pedido-estado');
 
 const formatoPrecio = new Intl.NumberFormat('es-CO', {
     style: 'currency',
@@ -186,6 +189,7 @@ function agregarAlCarrito(id) {
 
     guardarCarrito();
     renderCarrito();
+    pedidoEstado.textContent = '';
     avisar(`Agregado: ${producto.nombre}`);
 }
 
@@ -322,6 +326,7 @@ vaciarCarrito.addEventListener('click', () => {
     carrito = [];
     guardarCarrito();
     renderCarrito();
+    pedidoEstado.textContent = '';
 });
 
 dialogoCarrito.addEventListener('close', () => {
@@ -330,6 +335,53 @@ dialogoCarrito.addEventListener('close', () => {
 
 dialogoCarrito.addEventListener('click', (event) => {
     if (event.target === dialogoCarrito) cerrarDialogo();
+});
+
+formPedido.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    if (carrito.length === 0) return;
+
+    const datos = new FormData(formPedido);
+    const cuerpo = {
+        cliente: {
+            nombre: String(datos.get('nombre') || '').trim(),
+            email: String(datos.get('email') || '').trim(),
+            telefono: String(datos.get('telefono') || '').trim(),
+            direccion: String(datos.get('direccion') || '').trim(),
+        },
+        items: carrito.map((item) => ({
+            productoId: item.id,
+            cantidad: item.cantidad,
+        })),
+    };
+
+    botonPedido.disabled = true;
+    botonPedido.textContent = 'Enviando...';
+    pedidoEstado.textContent = '';
+
+    try {
+        const respuesta = await fetch('/api/pedidos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cuerpo),
+        });
+
+        const resultado = await respuesta.json().catch(() => ({}));
+        if (!respuesta.ok) throw new Error(resultado.error || 'No se pudo hacer el pedido.');
+
+        carrito = [];
+        guardarCarrito();
+        renderCarrito();
+        formPedido.reset();
+        pedidoEstado.textContent = 'Pedido recibido. Te contactamos para confirmar el pago y el envío.';
+        avisar('Pedido recibido.');
+    } catch (error) {
+        pedidoEstado.textContent = error.message;
+    } finally {
+        botonPedido.disabled = false;
+        botonPedido.textContent = 'Hacer pedido';
+    }
 });
 
 actualizarContador();
