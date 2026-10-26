@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Catálogo de balones, zapatillas, camisetas, accesorios y tableros de baloncesto de Dunk Labs.">
+    <meta name="description" content="Catálogo de balones, zapatillas, camisetas, morrales, accesorios y tableros de baloncesto de Dunk Labs.">
     <meta name="theme-color" content="#08090b">
     <link rel="stylesheet" href="styles.css">
     <title>Catálogo — dunk labs</title>
@@ -25,62 +25,24 @@
     <main>
         <section id="catalogo">
             <h2>Catálogo completo</h2>
-            <p class="seccion-intro">Tienda · 5 categorías</p>
+            <p class="seccion-intro">Tienda · 6 categorías</p>
 
-            <div class="filtros">
+            <div class="filtros" role="group" aria-label="Filtrar por categoría">
                 <button class="filtro-btn activo" data-categoria="todos">Todos</button>
                 <button class="filtro-btn" data-categoria="balones">Balones</button>
                 <button class="filtro-btn" data-categoria="zapatillas">Zapatillas</button>
+                <button class="filtro-btn" data-categoria="mochilas">Mochilas</button>
                 <button class="filtro-btn" data-categoria="camisetas">Camisetas</button>
                 <button class="filtro-btn" data-categoria="accesorios">Accesorios</button>
                 <button class="filtro-btn" data-categoria="tableros">Tableros</button>
             </div>
 
-            <div class="grid-productos">
+            <div id="grid-productos" class="grid-productos" aria-live="polite"></div>
+            <p id="catalogo-estado" class="catalogo-estado" role="status"></p>
 
-                <div class="tarjeta-producto" data-categoria="balones">
-                    <span class="etiqueta">Más vendido</span>
-                    <img src="images/balon.webp" alt="Balón de baloncesto">
-                    <h3>Balón de Baloncesto</h3>
-                    <p class="descripcion">Balón oficial de cuero sintético, ideal para exteriores.</p>
-                    <p class="precio">$120.000</p>
-                    <button class="btn-agregar">Añadir al carrito</button>
-                </div>
-
-                <div class="tarjeta-producto" data-categoria="zapatillas">
-                    <span class="etiqueta">Nuevo</span>
-                    <img src="images/zapatos.jpg" alt="Zapatos de baloncesto de alto rendimiento">
-                    <h3>Zapatos de Alto Rendimiento</h3>
-                    <p class="descripcion">Amortiguación superior y agarre para cambios de dirección rápidos.</p>
-                    <p class="precio">$350.000</p>
-                    <button class="btn-agregar">Añadir al carrito</button>
-                </div>
-
-                <div class="tarjeta-producto" data-categoria="camisetas">
-                    <img src="images/camisa-nba.avif" alt="Camisa oficial de la NBA">
-                    <h3>Camisas Oficiales de la NBA</h3>
-                    <p class="descripcion">Camisetas originales de tus equipos y jugadores favoritos.</p>
-                    <p class="precio">$180.000</p>
-                    <button class="btn-agregar">Añadir al carrito</button>
-                </div>
-
-                <div class="tarjeta-producto" data-categoria="accesorios">
-                    <img src="images/accesorio.jpg" alt="Accesorios de entrenamiento de baloncesto">
-                    <h3>Accesorios de Entrenamiento</h3>
-                    <p class="descripcion">Bandas, conos y equipo para mejorar tu rendimiento.</p>
-                    <p class="precio">$45.000</p>
-                    <button class="btn-agregar">Añadir al carrito</button>
-                </div>
-
-                <div class="tarjeta-producto" data-categoria="tableros">
-                    <img src="images/tableros.jpg" alt="Tablero de baloncesto portátil">
-                    <h3>Tableros Portátiles</h3>
-                    <p class="descripcion">Fáciles de instalar, ideales para casa o entrenamiento.</p>
-                    <p class="precio">$600.000</p>
-                    <button class="btn-agregar">Añadir al carrito</button>
-                </div>
-
-            </div>
+            <noscript>
+                <p class="catalogo-estado">Este catálogo necesita JavaScript para mostrar los productos.</p>
+            </noscript>
         </section>
     </main>
 
@@ -104,5 +66,18 @@
         </div>
         <p class="footer-copy">&copy; 2026 dunk labs. Todos los derechos reservados.</p>
     </footer>
+
+    <template id="plantilla-producto">
+        <article class="tarjeta-producto">
+            <span class="etiqueta" hidden></span>
+            <img loading="lazy" decoding="async" alt="">
+            <h3></h3>
+            <p class="descripcion"></p>
+            <p class="precio"></p>
+            <button class="btn-agregar" type="button">Añadir al carrito</button>
+        </article>
+    </template>
+
+    <script src="js/catalogo.js" defer></script>
 </body>
 </html>
