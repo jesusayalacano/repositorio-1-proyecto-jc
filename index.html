@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Dunk Labs: balones, zapatillas, camisetas y accesorios de baloncesto para jugadores que van en serio.">
+    <meta name="theme-color" content="#08090b">
     <link rel="stylesheet" href="styles.css">
-    <title>dunk labs</title>
+    <title>dunk labs — Baloncesto sin límites</title>
 </head>
 <body>
     <header>
         <h1>dunk labs</h1>
         <nav>
             <ul>
+                <li><a href="index.html">Inicio</a></li>
                 <li><a href="#sobre-nosotros">Nosotros</a></li>
                 <li><a href="#productos">Productos</a></li>
                 <li><a href="#personalizacion">Personalización</a></li>
@@ -18,29 +21,62 @@
                 <li><a href="#contacto">Contacto</a></li>
             </ul>
         </nav>
-        <a href="catalogo.html" class="btn-catalogo">Ver Catálogo</a>
+        <a href="catalogo.html" class="btn-catalogo">Ver catálogo</a>
     </header>
+
     <main>
+        <section id="hero">
+            <p class="eyebrow">Baloncesto · Bogotá</p>
+            <h2>Equípate para <span class="acento">dominar</span> la cancha</h2>
+            <p class="hero-texto">Balones, zapatillas, camisetas y accesorios para jugadores que no se conforman. Calidad real, estilo propio y envíos a todo el país.</p>
+            <div class="hero-acciones">
+                <a class="btn-primario" href="catalogo.html">Ver catálogo</a>
+                <a class="btn-secundario" href="#personalizacion">Personalizar mi equipo</a>
+            </div>
+            <ul class="hero-datos">
+                <li><strong>5</strong><span>categorías</span></li>
+                <li><strong>100%</strong><span>baloncesto</span></li>
+                <li><strong>CO</strong><span>envíos nacionales</span></li>
+            </ul>
+        </section>
+
         <section id="sobre-nosotros">
             <h2>Sobre nosotros</h2>
             <p>Dunk Labs nació de la pasión por el baloncesto y el deseo de llevar equipamiento de calidad a cada jugador, sin importar su nivel. Desde balones hasta camisetas personalizadas, trabajamos para que cada producto refleje tu estilo dentro y fuera de la cancha.</p>
             <p>Nuestra misión es simple: que cada jugador se sienta identificado con su equipo, desde el primer tiro hasta la última canasta.</p>
         </section>
+
         <section id="productos">
             <h2>Productos destacados</h2>
             <ul>
-                <img src="images/balon.webp" alt="Balón de Basket"/>
-                <li>Balon de Baloncesto</li>
-                <img src="images/zapatos.jpg" alt="ZAPATOS DE BASKET"/>
-                <li>Zapatos de alto rendimiento</li>
-                <img src="images/camisa-nba.avif" alt="camisa de nba">
-                <li>Camisas oficiales de la NBA</li>
-                <img src="images/accesorio.jpg" alt="accesorio de baloncesto">
-                <li>Accesorios de entrenamiento</li>
-                <img src="images/tableros.jpg" alt="tablero de baloncestp ">
-                <li>Tableros portátiles</li>
+                <li>
+                    <img src="images/balon.webp" alt="Balón de baloncesto" loading="lazy">
+                    <h3>Balón de Baloncesto</h3>
+                    <p class="precio-destacado">$120.000</p>
+                </li>
+                <li>
+                    <img src="images/zapatos.jpg" alt="Zapatos de baloncesto de alto rendimiento" loading="lazy">
+                    <h3>Zapatos de Alto Rendimiento</h3>
+                    <p class="precio-destacado">$350.000</p>
+                </li>
+                <li>
+                    <img src="images/camisa-nba.avif" alt="Camisa oficial de la NBA" loading="lazy">
+                    <h3>Camisas Oficiales de la NBA</h3>
+                    <p class="precio-destacado">$180.000</p>
+                </li>
+                <li>
+                    <img src="images/accesorio.jpg" alt="Accesorios de entrenamiento de baloncesto" loading="lazy">
+                    <h3>Accesorios de Entrenamiento</h3>
+                    <p class="precio-destacado">$45.000</p>
+                </li>
+                <li>
+                    <img src="images/tableros.jpg" alt="Tablero de baloncesto portátil" loading="lazy">
+                    <h3>Tableros Portátiles</h3>
+                    <p class="precio-destacado">$600.000</p>
+                </li>
             </ul>
         </section>
+
         <section id="personalizacion">
             <h2>Crea tu propio estilo</h2>
             <p>Personaliza tu equipo: elige tus colores, añade tu nombre o el número de tu jugador favorito en tus camisetas y zapatillas.</p>
@@ -49,14 +85,32 @@
                 <button>Personalizar Zapatillas</button>
             </div>
         </section>
+
         <section id="ofertas">
             <h2>Ofertas especiales</h2>
             <p>Aprovecha descuentos en zapatillas y accesorios.</p>
         </section>
     </main>
+
     <footer id="contacto">
-        <p>Contacto: dunklanbs.com</p>
-        <p>&copy; 2026 dunk labs. Todos los derechos reservados.</p>
+        <div class="footer-grid">
+            <div class="footer-marca">
+                <p class="footer-logo">dunk labs</p>
+                <p>Equipamiento de baloncesto para jugadores que van en serio.</p>
+            </div>
+            <div class="footer-contacto">
+                <p class="footer-titulo">Contacto</p>
+                <p>dunklabs.com</p>
+                <p>Bogotá, Colombia</p>
+            </div>
+            <div class="footer-enlaces">
+                <p class="footer-titulo">Explora</p>
+                <a href="index.html">Inicio</a>
+                <a href="catalogo.html">Catálogo</a>
+                <a href="#personalizacion">Personalización</a>
+            </div>
+        </div>
+        <p class="footer-copy">&copy; 2026 dunk labs. Todos los derechos reservados.</p>
     </footer>
 </body>
 </html>
