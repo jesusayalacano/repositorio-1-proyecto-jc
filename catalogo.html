@@ -27,6 +27,14 @@
             <h2>Catálogo completo</h2>
             <p class="seccion-intro">Tienda · 6 categorías</p>
 
+            <div class="catalogo-herramientas">
+                <label class="buscador">
+                    <span class="sr-only">Buscar productos</span>
+                    <input id="buscador" type="search" placeholder="Buscar producto" autocomplete="off">
+                </label>
+                <p id="resultado-conteo" class="resultado-conteo" aria-live="polite"></p>
+            </div>
+
             <div class="filtros" role="group" aria-label="Filtrar por categoría">
                 <button class="filtro-btn activo" data-categoria="todos">Todos</button>
                 <button class="filtro-btn" data-categoria="balones">Balones</button>

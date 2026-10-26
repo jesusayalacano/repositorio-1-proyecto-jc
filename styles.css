@@ -64,6 +64,18 @@ button {
     cursor: pointer;
 }
 
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 /* Header */
 
 header {
@@ -505,6 +517,44 @@ footer[id] {
     text-transform: uppercase;
 }
 
+.catalogo-herramientas {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.buscador {
+    flex: 1;
+    max-width: 420px;
+}
+
+.buscador input {
+    width: 100%;
+    padding: 0.65rem 0.9rem;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: var(--surface-2);
+    color: var(--text);
+    font: inherit;
+    font-size: 0.88rem;
+}
+
+.buscador input::placeholder {
+    color: var(--muted);
+}
+
+.buscador input:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+.resultado-conteo {
+    color: var(--muted);
+    font-size: 0.78rem;
+}
+
 .filtros {
     display: flex;
     flex-wrap: wrap;
@@ -540,6 +590,16 @@ footer[id] {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
     gap: 1.1rem;
+}
+
+.catalogo-estado {
+    margin-top: 1.2rem;
+    color: var(--muted);
+    text-align: center;
+}
+
+.catalogo-estado:empty {
+    display: none;
 }
 
 .tarjeta-producto {
@@ -756,6 +816,16 @@ footer {
 
     section {
         padding: 1.5rem 1.25rem;
+    }
+
+    .catalogo-herramientas {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+
+    .buscador {
+        max-width: none;
     }
 
     #hero {
