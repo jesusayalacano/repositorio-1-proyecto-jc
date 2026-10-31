@@ -42,6 +42,38 @@ function normalizar(texto) {
         .toLowerCase();
 }
 
+function actualizarUrl() {
+    const parametros = new URLSearchParams();
+    const texto = buscador.value.trim();
+
+    if (filtro !== 'todos') parametros.set('categoria', filtro);
+    if (texto) parametros.set('q', texto);
+
+    const url = parametros.toString()
+        ? `${window.location.pathname}?${parametros.toString()}`
+        : window.location.pathname;
+
+    history.replaceState(null, '', url);
+}
+
+function aplicarParametros() {
+    const parametros = new URLSearchParams(window.location.search);
+    const categoria = parametros.get('categoria');
+    const texto = parametros.get('q');
+
+    if (categoria && [...botonesFiltro].some((boton) => boton.dataset.categoria === categoria)) {
+        filtro = categoria;
+        botonesFiltro.forEach((boton) => {
+            boton.classList.toggle('activo', boton.dataset.categoria === categoria);
+        });
+    }
+
+    if (texto) {
+        buscador.value = texto;
+        busqueda = normalizar(texto);
+    }
+}
+
 function leerCarrito() {
     try {
         const guardado = JSON.parse(localStorage.getItem(CLAVE_CARRITO) || '[]');
@@ -297,12 +329,14 @@ botonesFiltro.forEach((boton) => {
     boton.addEventListener('click', () => {
         filtro = boton.dataset.categoria;
         botonesFiltro.forEach((otro) => otro.classList.toggle('activo', otro === boton));
+        actualizarUrl();
         renderProductos();
     });
 });
 
 buscador.addEventListener('input', () => {
     busqueda = normalizar(buscador.value.trim());
+    actualizarUrl();
     renderProductos();
 });
 
@@ -384,5 +418,6 @@ formPedido.addEventListener('submit', async (event) => {
     }
 });
 
+aplicarParametros();
 actualizarContador();
 cargarProductos();

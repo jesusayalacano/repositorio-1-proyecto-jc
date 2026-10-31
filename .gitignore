@@ -16,7 +16,11 @@ yarn-error.log*
 # Datos generados en tiempo de ejecución
 server-dk/data/pedidos.json
 server-dk/data/mensajes.json
+server-dk/data/personalizaciones.json
 server-dk/data/*.tmp
+
+# Imágenes subidas por los clientes
+server-dk/uploads/
 
 # Sistema operativo
 .DS_Store

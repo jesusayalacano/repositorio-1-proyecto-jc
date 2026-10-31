@@ -10,6 +10,7 @@
  */
 
 const express = require('express');
+const multer = require('multer');
 const path = require('node:path');
 const fs = require('node:fs/promises');
 const crypto = require('node:crypto');
@@ -23,8 +24,15 @@ const DATA_DIR = path.join(__dirname, 'data');
 const ARCHIVO_PRODUCTOS = path.join(DATA_DIR, 'productos.json');
 const ARCHIVO_PEDIDOS = path.join(DATA_DIR, 'pedidos.json');
 const ARCHIVO_MENSAJES = path.join(DATA_DIR, 'mensajes.json');
+const ARCHIVO_PERSONALIZACIONES = path.join(DATA_DIR, 'personalizaciones.json');
+const UPLOAD_DIR = path.join(__dirname, 'uploads');
 
 const CATEGORIAS = ['balones', 'zapatillas', 'camisetas', 'mochilas', 'accesorios', 'tableros'];
+const TIPOS_IMAGEN = new Map([
+  ['image/jpeg', '.jpg'],
+  ['image/png', '.png'],
+  ['image/webp', '.webp'],
+]);
 
 /* ------------------------------------------------------------------ */
 /* Utilidades                                                          */
@@ -77,6 +85,30 @@ function nuevoId(prefijo) {
   return `${prefijo}-${crypto.randomUUID()}`;
 }
 
+const subirImagen = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => {
+      fs.mkdir(UPLOAD_DIR, { recursive: true })
+        .then(() => cb(null, UPLOAD_DIR))
+        .catch(cb);
+    },
+    filename: (req, file, cb) => {
+      const extension = TIPOS_IMAGEN.get(file.mimetype) || '';
+      cb(null, `${Date.now()}-${crypto.randomUUID()}${extension}`);
+    },
+  }),
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+    files: 1,
+  },
+  fileFilter: (req, file, cb) => {
+    if (!TIPOS_IMAGEN.has(file.mimetype)) {
+      return cb(new ApiError(400, 'La imagen debe ser JPG, PNG o WebP'));
+    }
+    cb(null, true);
+  },
+});
+
 /* ------------------------------------------------------------------ */
 /* Middlewares generales                                               */
 /* ------------------------------------------------------------------ */
@@ -114,8 +146,14 @@ app.use(
   express.static(path.join(ROOT, 'images'), { maxAge: '1d', fallthrough: true })
 );
 
+app.use('/uploads', express.static(UPLOAD_DIR, { maxAge: '7d', fallthrough: true }));
+
 app.get('/styles.css', (req, res) => {
   res.sendFile(path.join(ROOT, 'styles.css'));
+});
+
+app.get('/favicon.svg', (req, res) => {
+  res.sendFile(path.join(ROOT, 'favicon.svg'));
 });
 
 app.use('/js', express.static(path.join(ROOT, 'js'), { maxAge: '1h' }));
@@ -345,6 +383,74 @@ app.post(
   })
 );
 
+/* ------------------------- Personalizaciones ---------------------- */
+
+app.post(
+  '/api/personalizaciones',
+  subirImagen.single('imagen'),
+  asyncHandler(async (req, res) => {
+    try {
+      const tipo = texto(req.body?.tipo).toLowerCase();
+      const nombre = texto(req.body?.nombre);
+      const email = texto(req.body?.email).toLowerCase();
+      const telefono = texto(req.body?.telefono);
+      const talla = texto(req.body?.talla);
+      const color = texto(req.body?.color);
+      const detalle = texto(req.body?.detalle).slice(0, 40);
+      const notas = texto(req.body?.notas).slice(0, 120);
+
+      if (!['camiseta', 'zapatillas'].includes(tipo)) {
+        throw new ApiError(400, 'Elige camiseta o zapatillas');
+      }
+      if (nombre.length < 3) {
+        throw new ApiError(400, 'El nombre debe tener al menos 3 caracteres');
+      }
+      if (!esEmailValido(email)) {
+        throw new ApiError(400, 'El email no es válido');
+      }
+      if (telefono.length < 7) {
+        throw new ApiError(400, 'El teléfono debe tener al menos 7 caracteres');
+      }
+      if (talla.length < 1) {
+        throw new ApiError(400, 'Falta la talla');
+      }
+      if (color.length < 1) {
+        throw new ApiError(400, 'Falta el color');
+      }
+
+      const solicitud = {
+        id: nuevoId('per'),
+        tipo,
+        nombre,
+        email,
+        telefono,
+        talla,
+        color,
+        detalle,
+        notas,
+        imagen: req.file ? `/uploads/${req.file.filename}` : null,
+        estado: 'pendiente',
+        creadoEn: new Date().toISOString(),
+      };
+
+      const solicitudes = await leerJson(ARCHIVO_PERSONALIZACIONES, []);
+      solicitudes.push(solicitud);
+      await escribirJson(ARCHIVO_PERSONALIZACIONES, solicitudes);
+
+      res.status(201).json({
+        ok: true,
+        mensaje: 'Solicitud recibida',
+        solicitud,
+      });
+    } catch (error) {
+      if (req.file?.path) {
+        await fs.unlink(req.file.path).catch(() => {});
+      }
+      throw error;
+    }
+  })
+);
+
 /* ------------------------------------------------------------------ */
 /* Validación de productos                                             */
 /* ------------------------------------------------------------------ */
@@ -413,6 +519,14 @@ app.use((req, res) => {
 
 // eslint-disable-next-line no-unused-vars
 app.use((error, req, res, next) => {
+  if (error instanceof multer.MulterError) {
+    const mensaje =
+      error.code === 'LIMIT_FILE_SIZE'
+        ? 'La imagen no puede superar 5 MB'
+        : 'No se pudo subir la imagen';
+    return res.status(400).json({ error: mensaje });
+  }
+
   if (error instanceof ApiError) {
     return res.status(error.status).json({
       error: error.message,

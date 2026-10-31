@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Catálogo de balones, zapatillas, camisetas, morrales, accesorios y tableros de baloncesto de Dunk Labs.">
     <meta name="theme-color" content="#08090b">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="styles.css">
     <title>Catálogo — dunk labs</title>
 </head>
 <body>
     <header>
-        <h1>dunk labs</h1>
+        <h1><a href="index.html">dunk labs</a></h1>
         <nav>
             <ul>
                 <li><a href="index.html">Inicio</a></li>
@@ -36,13 +37,13 @@
             </div>
 
             <div class="filtros" role="group" aria-label="Filtrar por categoría">
-                <button class="filtro-btn activo" data-categoria="todos">Todos</button>
-                <button class="filtro-btn" data-categoria="balones">Balones</button>
-                <button class="filtro-btn" data-categoria="zapatillas">Zapatillas</button>
-                <button class="filtro-btn" data-categoria="mochilas">Mochilas</button>
-                <button class="filtro-btn" data-categoria="camisetas">Camisetas</button>
-                <button class="filtro-btn" data-categoria="accesorios">Accesorios</button>
-                <button class="filtro-btn" data-categoria="tableros">Tableros</button>
+                <button type="button" class="filtro-btn activo" data-categoria="todos">Todos</button>
+                <button type="button" class="filtro-btn" data-categoria="balones">Balones</button>
+                <button type="button" class="filtro-btn" data-categoria="zapatillas">Zapatillas</button>
+                <button type="button" class="filtro-btn" data-categoria="mochilas">Mochilas</button>
+                <button type="button" class="filtro-btn" data-categoria="camisetas">Camisetas</button>
+                <button type="button" class="filtro-btn" data-categoria="accesorios">Accesorios</button>
+                <button type="button" class="filtro-btn" data-categoria="tableros">Tableros</button>
             </div>
 
             <div id="grid-productos" class="grid-productos" aria-live="polite"></div>
@@ -62,14 +63,15 @@
             </div>
             <div class="footer-contacto">
                 <p class="footer-titulo">Contacto</p>
-                <p>dunklabs.com</p>
                 <p>Bogotá, Colombia</p>
+                <p><a href="index.html#contacto">Escríbenos</a></p>
             </div>
             <div class="footer-enlaces">
                 <p class="footer-titulo">Explora</p>
                 <a href="index.html">Inicio</a>
                 <a href="catalogo.html">Catálogo</a>
                 <a href="index.html#personalizacion">Personalización</a>
+                <a href="index.html#contacto">Contacto</a>
             </div>
         </div>
         <p class="footer-copy">&copy; 2026 dunk labs. Todos los derechos reservados.</p>

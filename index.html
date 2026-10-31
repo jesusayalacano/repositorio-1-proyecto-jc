@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Dunk Labs: balones, zapatillas, camisetas y accesorios de baloncesto para jugadores que van en serio.">
     <meta name="theme-color" content="#08090b">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="styles.css">
     <title>dunk labs — Baloncesto sin límites</title>
 </head>
 <body>
     <header>
-        <h1>dunk labs</h1>
+        <h1><a href="index.html">dunk labs</a></h1>
         <nav>
             <ul>
                 <li><a href="index.html">Inicio</a></li>
@@ -50,49 +51,74 @@
             <h2>Productos destacados</h2>
             <ul>
                 <li>
-                    <img src="images/balon.webp" alt="Balón de baloncesto" loading="lazy">
-                    <h3>Balón de Baloncesto</h3>
-                    <p class="precio-destacado">$120.000</p>
+                    <a class="producto-destacado" href="catalogo.html?categoria=balones">
+                        <img src="images/balon.webp" alt="Balón de baloncesto" loading="lazy">
+                        <h3>Balón de Baloncesto</h3>
+                        <p class="precio-destacado">$120.000</p>
+                    </a>
                 </li>
                 <li>
-                    <img src="images/zapatos.jpg" alt="Zapatos de baloncesto de alto rendimiento" loading="lazy">
-                    <h3>Zapatos de Alto Rendimiento</h3>
-                    <p class="precio-destacado">$350.000</p>
+                    <a class="producto-destacado" href="catalogo.html?categoria=zapatillas">
+                        <img src="images/zapatos.jpg" alt="Zapatos de baloncesto de alto rendimiento" loading="lazy">
+                        <h3>Zapatos de Alto Rendimiento</h3>
+                        <p class="precio-destacado">$350.000</p>
+                    </a>
                 </li>
                 <li>
-                    <img src="images/camisa-nba.avif" alt="Camisa oficial de la NBA" loading="lazy">
-                    <h3>Camisas Oficiales de la NBA</h3>
-                    <p class="precio-destacado">$180.000</p>
+                    <a class="producto-destacado" href="catalogo.html?categoria=camisetas">
+                        <img src="images/camisa-nba.avif" alt="Camisa oficial de la NBA" loading="lazy">
+                        <h3>Camisas Oficiales de la NBA</h3>
+                        <p class="precio-destacado">$180.000</p>
+                    </a>
                 </li>
                 <li>
-                    <img src="images/accesorio.jpg" alt="Accesorios de entrenamiento de baloncesto" loading="lazy">
-                    <h3>Accesorios de Entrenamiento</h3>
-                    <p class="precio-destacado">$45.000</p>
+                    <a class="producto-destacado" href="catalogo.html?categoria=accesorios">
+                        <img src="images/accesorio.jpg" alt="Accesorios de entrenamiento de baloncesto" loading="lazy">
+                        <h3>Accesorios de Entrenamiento</h3>
+                        <p class="precio-destacado">$45.000</p>
+                    </a>
                 </li>
                 <li>
-                    <img src="images/tableros.jpg" alt="Tablero de baloncesto portátil" loading="lazy">
-                    <h3>Tableros Portátiles</h3>
-                    <p class="precio-destacado">$600.000</p>
+                    <a class="producto-destacado" href="catalogo.html?categoria=tableros">
+                        <img src="images/tableros.jpg" alt="Tablero de baloncesto portátil" loading="lazy">
+                        <h3>Tableros Portátiles</h3>
+                        <p class="precio-destacado">$600.000</p>
+                    </a>
                 </li>
             </ul>
         </section>
 
         <section id="personalizacion">
             <h2>Crea tu propio estilo</h2>
-            <p>Personaliza tu equipo: elige tus colores, añade tu nombre o el número de tu jugador favorito en tus camisetas y zapatillas.</p>
+            <p>Elige el color, sube una imagen de referencia y dinos qué nombre o número quieres. Te confirmamos por correo o teléfono.</p>
             <div class="opciones-personalizar">
-                <button>Personalizar Camiseta</button>
-                <button>Personalizar Zapatillas</button>
+                <button type="button" data-personalizar="camiseta">Personalizar Camiseta</button>
+                <button type="button" data-personalizar="zapatillas">Personalizar Zapatillas</button>
             </div>
         </section>
 
         <section id="ofertas">
             <h2>Ofertas especiales</h2>
             <p>Aprovecha descuentos en zapatillas y accesorios.</p>
+            <a class="btn-secundario" href="catalogo.html">Ver catálogo</a>
+        </section>
+
+        <section id="contacto">
+            <h2>Contacto</h2>
+            <p>Escríbenos si tienes una duda sobre un pedido, una talla o una personalización.</p>
+            <form id="form-contacto" class="formulario">
+                <div class="form-grid">
+                    <label>Nombre<input name="nombre" autocomplete="name" required minlength="3"></label>
+                    <label>Correo<input name="email" type="email" autocomplete="email" required></label>
+                </div>
+                <label>Mensaje<textarea name="mensaje" rows="4" required minlength="10"></textarea></label>
+                <button type="submit" class="btn-primario">Enviar mensaje</button>
+                <p id="contacto-estado" class="form-estado" role="status"></p>
+            </form>
         </section>
     </main>
 
-    <footer id="contacto">
+    <footer>
         <div class="footer-grid">
             <div class="footer-marca">
                 <p class="footer-logo">dunk labs</p>
@@ -100,17 +126,75 @@
             </div>
             <div class="footer-contacto">
                 <p class="footer-titulo">Contacto</p>
-                <p>dunklabs.com</p>
                 <p>Bogotá, Colombia</p>
+                <p><a href="#contacto">Escríbenos</a></p>
             </div>
             <div class="footer-enlaces">
                 <p class="footer-titulo">Explora</p>
                 <a href="index.html">Inicio</a>
                 <a href="catalogo.html">Catálogo</a>
                 <a href="#personalizacion">Personalización</a>
+                <a href="#contacto">Contacto</a>
             </div>
         </div>
         <p class="footer-copy">&copy; 2026 dunk labs. Todos los derechos reservados.</p>
     </footer>
+
+    <dialog id="dialogo-personalizar" class="dialogo-personalizar" aria-labelledby="personalizar-titulo">
+        <div class="dialogo-cabecera">
+            <h2 id="personalizar-titulo">Personalizar camiseta</h2>
+            <button type="button" class="dialogo-cerrar" id="cerrar-personalizar">Cerrar</button>
+        </div>
+
+        <form id="form-personalizar" class="formulario" enctype="multipart/form-data">
+            <input type="hidden" name="tipo" id="personalizar-tipo" value="camiseta">
+            <p class="personalizar-producto" id="personalizar-producto">Camiseta</p>
+
+            <div class="form-grid">
+                <label>Nombre<input name="nombre" autocomplete="name" required minlength="3"></label>
+                <label>Correo<input name="email" type="email" autocomplete="email" required></label>
+                <label>Teléfono<input name="telefono" type="tel" autocomplete="tel" required></label>
+                <label>Talla<input name="talla" required placeholder="S, M, L o 40"></label>
+            </div>
+
+            <fieldset class="color-campo">
+                <legend>Color</legend>
+                <div class="colores" role="group" aria-label="Elegir color">
+                    <button type="button" class="color-opcion activo" data-color="Negro" aria-pressed="true"><span style="--color:#0d0d0d"></span>Negro</button>
+                    <button type="button" class="color-opcion" data-color="Blanco" aria-pressed="false"><span style="--color:#f7f8f5"></span>Blanco</button>
+                    <button type="button" class="color-opcion" data-color="Rojo" aria-pressed="false"><span style="--color:#c62828"></span>Rojo</button>
+                    <button type="button" class="color-opcion" data-color="Azul" aria-pressed="false"><span style="--color:#1565c0"></span>Azul</button>
+                    <button type="button" class="color-opcion" data-color="Verde" aria-pressed="false"><span style="--color:#2e7d32"></span>Verde</button>
+                    <button type="button" class="color-opcion" data-color="Naranja" aria-pressed="false"><span style="--color:#ff5c00"></span>Naranja</button>
+                    <button type="button" class="color-opcion" data-color="Morado" aria-pressed="false"><span style="--color:#6a1b9a"></span>Morado</button>
+                    <button type="button" class="color-opcion" data-color="Amarillo" aria-pressed="false"><span style="--color:#d6ff3f"></span>Amarillo</button>
+                </div>
+                <label class="color-personalizado">Otro color<input type="color" id="color-personalizado" value="#d6ff3f"></label>
+                <input type="hidden" name="color" id="color-seleccionado" value="Negro">
+            </fieldset>
+
+            <div class="form-grid">
+                <label>Nombre o número<input name="detalle" placeholder="Ej: AYALA 23" maxlength="40"></label>
+                <label>Notas<input name="notas" placeholder="Ej: logo en la espalda" maxlength="120"></label>
+            </div>
+
+            <div class="campo-imagen">
+                <p class="etiqueta-campo">Imagen de referencia</p>
+                <div class="imagen-acciones">
+                    <label for="imagen-personalizacion" class="btn-subir">Subir imagen</label>
+                    <input id="imagen-personalizacion" class="input-archivo" name="imagen" type="file" accept="image/png,image/jpeg,image/webp">
+                    <button type="button" id="quitar-imagen" class="btn-quitar-imagen" hidden>Quitar imagen</button>
+                </div>
+                <p class="ayuda-campo">JPG, PNG o WebP. Máximo 5 MB.</p>
+                <img id="preview-personalizacion" class="preview-personalizacion" alt="Vista previa de la imagen" hidden>
+                <p id="imagen-estado" class="form-estado" role="status"></p>
+            </div>
+
+            <button type="submit" class="btn-primario" id="boton-personalizar">Enviar solicitud</button>
+            <p id="personalizar-estado" class="form-estado" role="status"></p>
+        </form>
+    </dialog>
+
+    <script src="js/inicio.js" defer></script>
 </body>
 </html>
