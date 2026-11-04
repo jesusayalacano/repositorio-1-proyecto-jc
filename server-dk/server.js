@@ -6,28 +6,33 @@
  *   npm start        (o npm run dev con recarga automática)
  *
  * Variables de entorno:
- *   PORT  Puerto HTTP (por defecto 3000)
+ *   PORT          Puerto HTTP (por defecto 3000)
+ *   MONGODB_URI   Cadena de conexión de MongoDB Atlas
+ *   MONGODB_DB    Nombre de la base de datos (por defecto dunklabs)
  */
+
+const path = require('node:path');
+require('dotenv').config({ path: path.join(__dirname, '.env'), quiet: true });
 
 const express = require('express');
 const multer = require('multer');
-const path = require('node:path');
+const mongoose = require('mongoose');
 const fs = require('node:fs/promises');
 const crypto = require('node:crypto');
+
+const { conectarDB } = require('./db');
+const { CATEGORIAS, TIPOS_PERSONALIZACION } = require('./constantes');
+const Producto = require('./models/Producto');
+const Pedido = require('./models/Pedido');
+const Mensaje = require('./models/Mensaje');
+const Personalizacion = require('./models/Personalizacion');
 
 const app = express();
 
 const PORT = Number(process.env.PORT) || 3000;
 const ROOT = path.join(__dirname, '..');
-const DATA_DIR = path.join(__dirname, 'data');
-
-const ARCHIVO_PRODUCTOS = path.join(DATA_DIR, 'productos.json');
-const ARCHIVO_PEDIDOS = path.join(DATA_DIR, 'pedidos.json');
-const ARCHIVO_MENSAJES = path.join(DATA_DIR, 'mensajes.json');
-const ARCHIVO_PERSONALIZACIONES = path.join(DATA_DIR, 'personalizaciones.json');
 const UPLOAD_DIR = path.join(__dirname, 'uploads');
 
-const CATEGORIAS = ['balones', 'zapatillas', 'camisetas', 'mochilas', 'accesorios', 'tableros'];
 const TIPOS_IMAGEN = new Map([
   ['image/jpeg', '.jpg'],
   ['image/png', '.png'],
@@ -50,27 +55,12 @@ class ApiError extends Error {
 const asyncHandler = (fn) => (req, res, next) =>
   Promise.resolve(fn(req, res, next)).catch(next);
 
-/** Lee un JSON del disco. Si el archivo no existe devuelve `porDefecto`. */
-async function leerJson(archivo, porDefecto = []) {
-  try {
-    const contenido = await fs.readFile(archivo, 'utf8');
-    return JSON.parse(contenido);
-  } catch (error) {
-    if (error.code === 'ENOENT') return porDefecto;
-    throw error;
-  }
-}
-
-/** Escribe un JSON de forma atómica (archivo temporal + rename). */
-async function escribirJson(archivo, datos) {
-  await fs.mkdir(path.dirname(archivo), { recursive: true });
-  const temporal = `${archivo}.tmp`;
-  await fs.writeFile(temporal, JSON.stringify(datos, null, 2), 'utf8');
-  await fs.rename(temporal, archivo);
-}
-
 function texto(valor) {
   return typeof valor === 'string' ? valor.trim() : '';
+}
+
+function escaparRegex(valor) {
+  return valor.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function esEmailValido(valor) {
@@ -175,6 +165,7 @@ app.get('/api/health', (req, res) => {
     ok: true,
     servicio: 'dunk labs api',
     version: '1.0.0',
+    baseDatos: mongoose.connection.readyState === 1 ? 'conectada' : 'desconectada',
     hora: new Date().toISOString(),
   });
 });
@@ -184,29 +175,23 @@ app.get('/api/health', (req, res) => {
 app.get(
   '/api/productos',
   asyncHandler(async (req, res) => {
-    let productos = await leerJson(ARCHIVO_PRODUCTOS, []);
-
     const categoria = texto(req.query.categoria).toLowerCase();
     const busqueda = texto(req.query.q).toLowerCase();
     const soloDisponibles = req.query.disponible === 'true';
 
-    if (categoria && categoria !== 'todos') {
-      if (!CATEGORIAS.includes(categoria)) {
-        throw new ApiError(400, `Categoría inválida. Usa: ${CATEGORIAS.join(', ')}`);
-      }
-      productos = productos.filter((p) => p.categoria === categoria);
+    if (categoria && categoria !== 'todos' && !CATEGORIAS.includes(categoria)) {
+      throw new ApiError(400, `Categoría inválida. Usa: ${CATEGORIAS.join(', ')}`);
     }
 
+    const filtro = {};
+    if (categoria && categoria !== 'todos') filtro.categoria = categoria;
+    if (soloDisponibles) filtro.stock = { $gt: 0 };
     if (busqueda) {
-      productos = productos.filter((p) =>
-        `${p.nombre} ${p.descripcion}`.toLowerCase().includes(busqueda)
-      );
+      const patron = new RegExp(escaparRegex(busqueda), 'i');
+      filtro.$or = [{ nombre: patron }, { descripcion: patron }];
     }
 
-    if (soloDisponibles) {
-      productos = productos.filter((p) => p.stock > 0);
-    }
-
+    const productos = await Producto.find(filtro).sort({ creadoEn: 1, _id: 1 });
     res.json({ total: productos.length, productos });
   })
 );
@@ -214,8 +199,7 @@ app.get(
 app.get(
   '/api/productos/:id',
   asyncHandler(async (req, res) => {
-    const productos = await leerJson(ARCHIVO_PRODUCTOS, []);
-    const producto = productos.find((p) => p.id === req.params.id);
+    const producto = await Producto.findOne({ id: req.params.id });
 
     if (!producto) throw new ApiError(404, 'Producto no encontrado');
     res.json(producto);
@@ -226,11 +210,11 @@ app.post(
   '/api/productos',
   asyncHandler(async (req, res) => {
     const datos = validarProducto(req.body);
-    const productos = await leerJson(ARCHIVO_PRODUCTOS, []);
-
-    const producto = { id: nuevoId('prod'), ...datos, creadoEn: new Date().toISOString() };
-    productos.push(producto);
-    await escribirJson(ARCHIVO_PRODUCTOS, productos);
+    const producto = await Producto.create({
+      id: nuevoId('prod'),
+      ...datos,
+      creadoEn: new Date(),
+    });
 
     res.status(201).json(producto);
   })
@@ -239,35 +223,25 @@ app.post(
 app.put(
   '/api/productos/:id',
   asyncHandler(async (req, res) => {
-    const productos = await leerJson(ARCHIVO_PRODUCTOS, []);
-    const indice = productos.findIndex((p) => p.id === req.params.id);
-
-    if (indice === -1) throw new ApiError(404, 'Producto no encontrado');
-
     const datos = validarProducto(req.body, { parcial: true });
-    productos[indice] = {
-      ...productos[indice],
-      ...datos,
-      actualizadoEn: new Date().toISOString(),
-    };
-    await escribirJson(ARCHIVO_PRODUCTOS, productos);
+    const producto = await Producto.findOneAndUpdate(
+      { id: req.params.id },
+      { $set: { ...datos, actualizadoEn: new Date() } },
+      { returnDocument: 'after', runValidators: true }
+    );
 
-    res.json(productos[indice]);
+    if (!producto) throw new ApiError(404, 'Producto no encontrado');
+    res.json(producto);
   })
 );
 
 app.delete(
   '/api/productos/:id',
   asyncHandler(async (req, res) => {
-    const productos = await leerJson(ARCHIVO_PRODUCTOS, []);
-    const indice = productos.findIndex((p) => p.id === req.params.id);
+    const producto = await Producto.findOneAndDelete({ id: req.params.id });
 
-    if (indice === -1) throw new ApiError(404, 'Producto no encontrado');
-
-    const [eliminado] = productos.splice(indice, 1);
-    await escribirJson(ARCHIVO_PRODUCTOS, productos);
-
-    res.json({ eliminado: true, producto: eliminado });
+    if (!producto) throw new ApiError(404, 'Producto no encontrado');
+    res.json({ eliminado: true, producto });
   })
 );
 
@@ -276,7 +250,7 @@ app.delete(
 app.get(
   '/api/pedidos',
   asyncHandler(async (req, res) => {
-    const pedidos = await leerJson(ARCHIVO_PEDIDOS, []);
+    const pedidos = await Pedido.find().sort({ creadoEn: -1 });
     res.json({ total: pedidos.length, pedidos });
   })
 );
@@ -284,8 +258,7 @@ app.get(
 app.get(
   '/api/pedidos/:id',
   asyncHandler(async (req, res) => {
-    const pedidos = await leerJson(ARCHIVO_PEDIDOS, []);
-    const pedido = pedidos.find((p) => p.id === req.params.id);
+    const pedido = await Pedido.findOne({ id: req.params.id });
 
     if (!pedido) throw new ApiError(404, 'Pedido no encontrado');
     res.json(pedido);
@@ -308,18 +281,28 @@ app.post(
       throw new ApiError(400, 'El pedido debe incluir al menos un producto');
     }
 
-    // Los precios SIEMPRE se toman del catálogo, nunca del cliente.
-    const productos = await leerJson(ARCHIVO_PRODUCTOS, []);
-    const lineas = [];
+    const cantidades = new Map();
 
     for (const item of items) {
-      const producto = productos.find((p) => p.id === item?.productoId);
-      if (!producto) throw new ApiError(400, `Producto inexistente: ${item?.productoId}`);
-
+      const productoId = texto(item?.productoId);
       const cantidad = item?.cantidad;
+
+      if (!productoId) throw new ApiError(400, 'Hay un producto inválido en el pedido');
       if (!esEnteroPositivo(cantidad)) {
-        throw new ApiError(400, `Cantidad inválida para "${producto.nombre}"`);
+        throw new ApiError(400, `Cantidad inválida para "${productoId}"`);
       }
+
+      cantidades.set(productoId, (cantidades.get(productoId) || 0) + cantidad);
+    }
+
+    // Los precios SIEMPRE se toman del catálogo, nunca del cliente.
+    const productos = await Producto.find({ id: { $in: [...cantidades.keys()] } });
+    const productosPorId = new Map(productos.map((producto) => [producto.id, producto]));
+    const lineas = [];
+
+    for (const [productoId, cantidad] of cantidades) {
+      const producto = productosPorId.get(productoId);
+      if (!producto) throw new ApiError(400, `Producto inexistente: ${productoId}`);
       if (cantidad > producto.stock) {
         throw new ApiError(400, `Stock insuficiente para "${producto.nombre}" (disponible: ${producto.stock})`);
       }
@@ -335,19 +318,15 @@ app.post(
 
     const total = lineas.reduce((suma, linea) => suma + linea.subtotal, 0);
 
-    const pedido = {
+    const pedido = await Pedido.create({
       id: nuevoId('ped'),
       cliente: { nombre, email, telefono, direccion },
       items: lineas,
       total,
       moneda: 'COP',
       estado: 'pendiente',
-      creadoEn: new Date().toISOString(),
-    };
-
-    const pedidos = await leerJson(ARCHIVO_PEDIDOS, []);
-    pedidos.push(pedido);
-    await escribirJson(ARCHIVO_PEDIDOS, pedidos);
+      creadoEn: new Date(),
+    });
 
     res.status(201).json(pedido);
   })
@@ -367,17 +346,13 @@ app.post(
     if (mensaje.length < 10) throw new ApiError(400, 'El mensaje debe tener al menos 10 caracteres');
     if (mensaje.length > 2000) throw new ApiError(400, 'El mensaje no puede superar 2000 caracteres');
 
-    const registro = {
+    const registro = await Mensaje.create({
       id: nuevoId('msg'),
       nombre,
       email,
       mensaje,
-      creadoEn: new Date().toISOString(),
-    };
-
-    const mensajes = await leerJson(ARCHIVO_MENSAJES, []);
-    mensajes.push(registro);
-    await escribirJson(ARCHIVO_MENSAJES, mensajes);
+      creadoEn: new Date(),
+    });
 
     res.status(201).json({ ok: true, mensaje: 'Mensaje recibido', registro });
   })
@@ -399,7 +374,7 @@ app.post(
       const detalle = texto(req.body?.detalle).slice(0, 40);
       const notas = texto(req.body?.notas).slice(0, 120);
 
-      if (!['camiseta', 'zapatillas'].includes(tipo)) {
+      if (!TIPOS_PERSONALIZACION.includes(tipo)) {
         throw new ApiError(400, 'Elige camiseta o zapatillas');
       }
       if (nombre.length < 3) {
@@ -418,7 +393,7 @@ app.post(
         throw new ApiError(400, 'Falta el color');
       }
 
-      const solicitud = {
+      const solicitud = await Personalizacion.create({
         id: nuevoId('per'),
         tipo,
         nombre,
@@ -430,12 +405,8 @@ app.post(
         notas,
         imagen: req.file ? `/uploads/${req.file.filename}` : null,
         estado: 'pendiente',
-        creadoEn: new Date().toISOString(),
-      };
-
-      const solicitudes = await leerJson(ARCHIVO_PERSONALIZACIONES, []);
-      solicitudes.push(solicitud);
-      await escribirJson(ARCHIVO_PERSONALIZACIONES, solicitudes);
+        creadoEn: new Date(),
+      });
 
       res.status(201).json({
         ok: true,
@@ -534,6 +505,25 @@ app.use((error, req, res, next) => {
     });
   }
 
+  if (error.name === 'ValidationError') {
+    return res.status(400).json({
+      error: 'Datos inválidos',
+      detalles: Object.values(error.errors || {}).map((item) => item.message),
+    });
+  }
+
+  if (error.name === 'CastError') {
+    return res.status(400).json({ error: 'Dato inválido' });
+  }
+
+  if (error.code === 11000) {
+    return res.status(409).json({ error: 'Ya existe un registro con ese identificador' });
+  }
+
+  if (error.name === 'MongooseServerSelectionError') {
+    return res.status(503).json({ error: 'La base de datos no está disponible' });
+  }
+
   if (error.type === 'entity.parse.failed') {
     return res.status(400).json({ error: 'JSON inválido en el cuerpo de la petición' });
   }
@@ -549,7 +539,9 @@ app.use((error, req, res, next) => {
 /* Arranque                                                            */
 /* ------------------------------------------------------------------ */
 
-if (require.main === module) {
+async function iniciar() {
+  await conectarDB();
+
   app.listen(PORT, () => {
     console.log(`dunk labs corriendo en http://localhost:${PORT}`);
     console.log(`API de productos:   http://localhost:${PORT}/api/productos`);
@@ -557,4 +549,13 @@ if (require.main === module) {
   });
 }
 
+if (require.main === module) {
+  iniciar().catch((error) => {
+    console.error('No se pudo iniciar dunk labs:', error.message);
+    process.exit(1);
+  });
+}
+
 module.exports = app;
+module.exports.app = app;
+module.exports.iniciar = iniciar;
