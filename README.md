@@ -8,10 +8,12 @@ Tienda de baloncesto. La página de inicio es HTML y CSS. El catálogo carga los
 cd server-dk
 npm install
 npm run seed
+npm run crear-admin   # requiere ADMIN_EMAIL y ADMIN_PASSWORD en .env
+npm run build:admin   # compila el panel React
 npm start
 ```
 
-Abrir `http://localhost:3000`. El catálogo está en `http://localhost:3000/catalogo`.
+Abrir `http://localhost:3000`. El catálogo está en `http://localhost:3000/catalogo` y el panel admin en `http://localhost:3000/admin`.
 
 El catálogo necesita el servidor porque los productos se piden a `/api/productos`. Si se abre el HTML con doble clic, no carga.
 
@@ -30,6 +32,10 @@ PORT=3000
 NODE_ENV=development
 MONGODB_URI=mongodb+srv://usuario:clave@cluster.mongodb.net/dunklabs?retryWrites=true&w=majority
 MONGODB_DB=dunklabs
+SESSION_SECRET=una-cadena-larga-y-aleatoria
+ADMIN_NOMBRE=Administrador Dunk Labs
+ADMIN_EMAIL=admin@dunklabs.co
+ADMIN_PASSWORD=define-una-contraseña-segura
 ```
 
 El archivo `.env` no se sube a Git.
@@ -46,19 +52,86 @@ El seed se puede correr varias veces sin duplicar productos. Si se cambió `data
 npm run seed -- --force
 ```
 
+## Panel de administración
+
+El panel está hecho con React y Vite en `client/`. Se sirve en `http://localhost:3000/admin`.
+
+Credenciales de demostración:
+
+```text
+Correo:     admin@dunklabs.co
+Contraseña: la definida en server-dk/.env (ADMIN_PASSWORD)
+```
+
+El usuario se crea (o se actualiza) con:
+
+```bash
+cd server-dk
+npm run crear-admin
+```
+
+Toma `ADMIN_EMAIL`, `ADMIN_PASSWORD` y `ADMIN_NOMBRE` del `.env`. **Cambia estas credenciales antes de publicar el sitio.**
+
+### Compilar el panel
+
+```bash
+cd client
+npm install
+npm run build
+```
+
+También se puede compilar desde `server-dk` con `npm run build:admin`.
+
+### Desarrollo con recarga
+
+```bash
+cd server-dk
+npm start        # API en el puerto 3000
+```
+
+```bash
+cd client
+npm run dev      # Vite en el puerto 5173 con proxy a /api
+```
+
+El panel incluye:
+
+- Login con sesión en cookie `httpOnly` y contraseña hasheada con bcrypt.
+- Resumen con productos, pedidos pendientes, mensajes y personalizaciones.
+- CRUD de productos (la imagen se indica con una ruta `/images/...` o una URL).
+- Pedidos con cambio de estado.
+- Mensajes de contacto.
+- Personalizaciones con vista previa de la imagen y cambio de estado.
+
 ## API
+
+Públicas:
 
 - `GET /api/health`
 - `GET /api/productos` (acepta `categoria`, `q` y `disponible`)
 - `GET /api/productos/:id`
+- `POST /api/pedidos`
+- `POST /api/contacto`
+- `POST /api/personalizaciones` (multipart: `tipo`, `nombre`, `email`, `telefono`, `talla`, `color`, `detalle`, `notas` e `imagen` opcional)
+
+Autenticación:
+
+- `POST /api/auth/login`
+- `POST /api/auth/logout`
+- `GET /api/auth/me`
+
+Protegidas (requieren sesión de administrador):
+
 - `POST /api/productos`
 - `PUT /api/productos/:id`
 - `DELETE /api/productos/:id`
 - `GET /api/pedidos`
 - `GET /api/pedidos/:id`
-- `POST /api/pedidos`
-- `POST /api/contacto`
-- `POST /api/personalizaciones` (multipart: `tipo`, `nombre`, `email`, `telefono`, `talla`, `color`, `detalle`, `notas` e `imagen` opcional)
+- `GET /api/admin/resumen`
+- `PUT /api/admin/pedidos/:id/estado`
+- `GET /api/admin/mensajes`
+- `GET /api/admin/personalizaciones`
+- `PUT /api/admin/personalizaciones/:id/estado`
 
 ## Personalización
 
@@ -72,9 +145,8 @@ Los productos se cargan desde `server-dk/data/productos.json` hacia la colecció
 
 ## Pendiente
 
-- Login y panel de administración.
-- Proteger los endpoints de administración.
 - Asistente con IA.
 - Publicar el sitio en internet.
 - Guardar las imágenes en Cloudinary o S3.
 - Pruebas automatizadas dentro del repositorio.
+- Cambiar las credenciales demo del panel antes de publicar.

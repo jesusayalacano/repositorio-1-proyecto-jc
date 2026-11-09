@@ -17,11 +17,17 @@ require('dotenv').config({ path: path.join(__dirname, '.env'), quiet: true });
 const express = require('express');
 const multer = require('multer');
 const mongoose = require('mongoose');
+const session = require('express-session');
+const { MongoStore } = require('connect-mongo');
 const fs = require('node:fs/promises');
 const crypto = require('node:crypto');
 
 const { conectarDB } = require('./db');
+const { ApiError } = require('./errors');
 const { CATEGORIAS, TIPOS_PERSONALIZACION } = require('./constantes');
+const { requiereAdmin } = require('./middleware/auth');
+const authRoutes = require('./routes/auth');
+const adminRoutes = require('./routes/admin');
 const Producto = require('./models/Producto');
 const Pedido = require('./models/Pedido');
 const Mensaje = require('./models/Mensaje');
@@ -32,6 +38,18 @@ const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 const ROOT = path.join(__dirname, '..');
 const UPLOAD_DIR = path.join(__dirname, 'uploads');
+const ADMIN_DIST = path.join(ROOT, 'client', 'dist');
+const SESSION_TTL = 8 * 60 * 60; // 8 horas en segundos
+
+const sessionStore = process.env.MONGODB_URI
+  ? MongoStore.create({
+      mongoUrl: process.env.MONGODB_URI,
+      dbName: process.env.MONGODB_DB || 'dunklabs',
+      collectionName: 'sesiones',
+      ttl: SESSION_TTL,
+      touchAfter: 24 * 3600,
+    })
+  : undefined;
 
 const TIPOS_IMAGEN = new Map([
   ['image/jpeg', '.jpg'],
@@ -42,14 +60,6 @@ const TIPOS_IMAGEN = new Map([
 /* ------------------------------------------------------------------ */
 /* Utilidades                                                          */
 /* ------------------------------------------------------------------ */
-
-class ApiError extends Error {
-  constructor(status, mensaje, detalles) {
-    super(mensaje);
-    this.status = status;
-    this.detalles = detalles;
-  }
-}
 
 /** Envuelve handlers async para que los errores lleguen al middleware. */
 const asyncHandler = (fn) => (req, res, next) =>
@@ -104,7 +114,28 @@ const subirImagen = multer({
 /* ------------------------------------------------------------------ */
 
 app.disable('x-powered-by');
+
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 app.use(express.json({ limit: '100kb' }));
+
+app.use(
+  session({
+    name: 'dunklabs.sid',
+    secret: process.env.SESSION_SECRET || 'dunklabs-dev-secret-cambiar',
+    resave: false,
+    saveUninitialized: false,
+    store: sessionStore,
+    cookie: {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: SESSION_TTL * 1000,
+    },
+  })
+);
 
 // CORS abierto solo en desarrollo (el sitio se sirve desde el mismo origen).
 if (process.env.NODE_ENV !== 'production') {
@@ -148,6 +179,23 @@ app.get('/favicon.svg', (req, res) => {
 
 app.use('/js', express.static(path.join(ROOT, 'js'), { maxAge: '1h' }));
 
+// Panel de administración (React compilado con Vite).
+app.use(
+  '/admin/assets',
+  express.static(path.join(ADMIN_DIST, 'assets'), { maxAge: '1y', immutable: true })
+);
+app.use('/admin', express.static(ADMIN_DIST, { index: false, fallthrough: true }));
+
+app.get(['/admin', '/admin/'], (req, res) => {
+  res.sendFile(path.join(ADMIN_DIST, 'index.html'), (error) => {
+    if (error && !res.headersSent) {
+      res
+        .status(503)
+        .send('El panel admin no está compilado. Ejecuta: cd client && npm install && npm run build');
+    }
+  });
+});
+
 app.get(['/', '/index.html'], (req, res) => {
   res.sendFile(path.join(ROOT, 'index.html'));
 });
@@ -169,6 +217,14 @@ app.get('/api/health', (req, res) => {
     hora: new Date().toISOString(),
   });
 });
+
+/* ------------------------- Autenticación -------------------------- */
+
+app.use('/api/auth', authRoutes);
+
+/* ------------------------- Administración -------------------------- */
+
+app.use('/api/admin', adminRoutes);
 
 /* --------------------------- Productos ---------------------------- */
 
@@ -208,6 +264,7 @@ app.get(
 
 app.post(
   '/api/productos',
+  requiereAdmin,
   asyncHandler(async (req, res) => {
     const datos = validarProducto(req.body);
     const producto = await Producto.create({
@@ -222,6 +279,7 @@ app.post(
 
 app.put(
   '/api/productos/:id',
+  requiereAdmin,
   asyncHandler(async (req, res) => {
     const datos = validarProducto(req.body, { parcial: true });
     const producto = await Producto.findOneAndUpdate(
@@ -237,6 +295,7 @@ app.put(
 
 app.delete(
   '/api/productos/:id',
+  requiereAdmin,
   asyncHandler(async (req, res) => {
     const producto = await Producto.findOneAndDelete({ id: req.params.id });
 
@@ -249,6 +308,7 @@ app.delete(
 
 app.get(
   '/api/pedidos',
+  requiereAdmin,
   asyncHandler(async (req, res) => {
     const pedidos = await Pedido.find().sort({ creadoEn: -1 });
     res.json({ total: pedidos.length, pedidos });
@@ -257,6 +317,7 @@ app.get(
 
 app.get(
   '/api/pedidos/:id',
+  requiereAdmin,
   asyncHandler(async (req, res) => {
     const pedido = await Pedido.findOne({ id: req.params.id });
 

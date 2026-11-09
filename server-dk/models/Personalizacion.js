@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { TIPOS_PERSONALIZACION } = require('../constantes');
+const { TIPOS_PERSONALIZACION, ESTADOS_PERSONALIZACION } = require('../constantes');
 
 const personalizacionSchema = new mongoose.Schema(
   {
@@ -58,7 +58,7 @@ const personalizacionSchema = new mongoose.Schema(
     },
     estado: {
       type: String,
-      enum: ['pendiente', 'contactado', 'cerrado'],
+      enum: ESTADOS_PERSONALIZACION,
       default: 'pendiente',
     },
     creadoEn: {

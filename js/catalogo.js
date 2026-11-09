@@ -42,6 +42,14 @@ function normalizar(texto) {
         .toLowerCase();
 }
 
+function urlImagen(valor) {
+    if (!valor) return '';
+    if (/^(https?:)?\/\//i.test(valor) || valor.startsWith('/') || valor.startsWith('data:')) {
+        return valor;
+    }
+    return `/${valor}`;
+}
+
 function actualizarUrl() {
     const parametros = new URLSearchParams();
     const texto = buscador.value.trim();
@@ -163,7 +171,7 @@ function renderProductos() {
             etiqueta.hidden = false;
         }
 
-        imagen.src = producto.imagen;
+        imagen.src = urlImagen(producto.imagen);
         imagen.alt = producto.nombre;
         titulo.textContent = producto.nombre;
         descripcion.textContent = producto.descripcion;
@@ -292,7 +300,7 @@ function renderCarrito() {
         const botonMas = fila.querySelector('[data-accion="mas"]');
 
         fila.dataset.id = producto.id;
-        imagen.src = producto.imagen;
+        imagen.src = urlImagen(producto.imagen);
         imagen.alt = producto.nombre;
         nombre.textContent = producto.nombre;
         precio.textContent = formatoPrecio.format(producto.precio);

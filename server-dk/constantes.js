@@ -17,8 +17,11 @@ const ESTADOS_PEDIDO = [
   'cancelado',
 ];
 
+const ESTADOS_PERSONALIZACION = ['pendiente', 'contactado', 'cerrado'];
+
 module.exports = {
   CATEGORIAS,
   TIPOS_PERSONALIZACION,
   ESTADOS_PEDIDO,
+  ESTADOS_PERSONALIZACION,
 };

@@ -2,6 +2,10 @@
 node_modules/
 package-lock.json
 
+# Build del panel admin
+client/dist/
+client/.vite/
+
 # Variables de entorno
 .env
 .env.local
