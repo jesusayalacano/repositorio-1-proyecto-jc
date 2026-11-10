@@ -1,6 +1,6 @@
 import { formatoPrecio, urlImagen } from '../utils/formato.js';
 
-export default function ProductoCard({ producto }) {
+export default function ProductoCard({ producto, onAgregar }) {
   const agotado = producto.stock <= 0;
 
   return (
@@ -16,7 +16,13 @@ export default function ProductoCard({ producto }) {
       <h3>{producto.nombre}</h3>
       <p className="descripcion">{producto.descripcion}</p>
       <p className="precio">{formatoPrecio.format(producto.precio)}</p>
-      <button className="btn-agregar" type="button" data-id={producto.id} disabled={agotado}>
+      <button
+        className="btn-agregar"
+        type="button"
+        data-id={producto.id}
+        disabled={agotado}
+        onClick={() => onAgregar(producto.id)}
+      >
         {agotado ? 'Agotado' : 'Añadir al carrito'}
       </button>
     </article>

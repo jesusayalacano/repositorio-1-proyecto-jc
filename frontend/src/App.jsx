@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import Contacto from './components/Contacto.jsx';
 import Footer from './components/Footer.jsx';
 import Header from './components/Header.jsx';
@@ -9,6 +11,8 @@ import ProductosDestacados from './components/ProductosDestacados.jsx';
 import SobreNosotros from './components/SobreNosotros.jsx';
 
 export default function App() {
+  const [tipoPersonalizacion, setTipoPersonalizacion] = useState(null);
+
   return (
     <>
       <Header />
@@ -16,12 +20,16 @@ export default function App() {
         <Hero />
         <SobreNosotros />
         <ProductosDestacados />
-        <Personalizacion />
+        <Personalizacion onAbrir={setTipoPersonalizacion} />
         <Ofertas />
         <Contacto />
       </main>
       <Footer />
-      <PersonalizacionDialog />
+      <PersonalizacionDialog
+        abierto={tipoPersonalizacion !== null}
+        tipo={tipoPersonalizacion || 'camiseta'}
+        onCerrar={() => setTipoPersonalizacion(null)}
+      />
     </>
   );
 }

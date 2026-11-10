@@ -1,4 +1,4 @@
-export default function Personalizacion() {
+export default function Personalizacion({ onAbrir }) {
   return (
     <section id="personalizacion">
       <h2>Crea tu propio estilo</h2>
@@ -7,10 +7,10 @@ export default function Personalizacion() {
         confirmamos por correo o teléfono.
       </p>
       <div className="opciones-personalizar">
-        <button type="button" data-personalizar="camiseta">
+        <button type="button" data-personalizar="camiseta" onClick={() => onAbrir('camiseta')}>
           Personalizar Camiseta
         </button>
-        <button type="button" data-personalizar="zapatillas">
+        <button type="button" data-personalizar="zapatillas" onClick={() => onAbrir('zapatillas')}>
           Personalizar Zapatillas
         </button>
       </div>

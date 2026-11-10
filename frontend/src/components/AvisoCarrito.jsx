@@ -1,3 +1,11 @@
-export default function AvisoCarrito() {
-  return <p id="aviso-carrito" className="aviso-carrito" role="status" />;
+export default function AvisoCarrito({ mensaje }) {
+  return (
+    <p
+      id="aviso-carrito"
+      className={mensaje ? 'aviso-carrito visible' : 'aviso-carrito'}
+      role="status"
+    >
+      {mensaje}
+    </p>
+  );
 }
