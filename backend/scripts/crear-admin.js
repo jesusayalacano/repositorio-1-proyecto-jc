@@ -4,8 +4,8 @@ require('dotenv').config({ path: path.join(__dirname, '..', '.env'), quiet: true
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-const { conectarDB } = require('../db');
-const Usuario = require('../models/Usuario');
+const { conectarDB } = require('../src/db');
+const Usuario = require('../src/models/Usuario');
 
 function argumento(nombre) {
   const prefijo = `--${nombre}=`;

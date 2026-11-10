@@ -3,8 +3,8 @@ require('dotenv').config({ path: path.join(__dirname, '..', '.env'), quiet: true
 
 const fs = require('node:fs/promises');
 const mongoose = require('mongoose');
-const { conectarDB } = require('../db');
-const Producto = require('../models/Producto');
+const { conectarDB } = require('../src/db');
+const Producto = require('../src/models/Producto');
 
 const ARCHIVO_PRODUCTOS = path.join(__dirname, '..', 'data', 'productos.json');
 const ACTUALIZAR = process.argv.includes('--force');

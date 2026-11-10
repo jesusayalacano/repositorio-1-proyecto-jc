@@ -1,5 +1,5 @@
 /**
- * dunk labs - API + servidor del sitio
+ * dunk labs - API
  *
  * Ejecutar:
  *   npm install
@@ -7,14 +7,16 @@
  *
  * Variables de entorno:
  *   PORT          Puerto HTTP (por defecto 3000)
+ *   FRONTEND_URL  Origen permitido para el frontend de Vite
  *   MONGODB_URI   Cadena de conexión de MongoDB Atlas
  *   MONGODB_DB    Nombre de la base de datos (por defecto dunklabs)
  */
 
 const path = require('node:path');
-require('dotenv').config({ path: path.join(__dirname, '.env'), quiet: true });
+require('dotenv').config({ path: path.join(__dirname, '..', '.env'), quiet: true });
 
 const express = require('express');
+const cors = require('cors');
 const multer = require('multer');
 const mongoose = require('mongoose');
 const session = require('express-session');
@@ -36,9 +38,8 @@ const Personalizacion = require('./models/Personalizacion');
 const app = express();
 
 const PORT = Number(process.env.PORT) || 3000;
-const ROOT = path.join(__dirname, '..');
-const UPLOAD_DIR = path.join(__dirname, 'uploads');
-const ADMIN_DIST = path.join(ROOT, 'client', 'dist');
+const UPLOAD_DIR = path.join(__dirname, '..', 'uploads');
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 const SESSION_TTL = 8 * 60 * 60; // 8 horas en segundos
 
 const sessionStore = process.env.MONGODB_URI
@@ -119,6 +120,15 @@ if (process.env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
 }
 
+// El frontend vive en Vite (5173) y la API en otro puerto. Se permite el
+// origen configurado y el envío de la cookie de sesión del panel admin.
+app.use(
+  cors({
+    origin: FRONTEND_URL,
+    credentials: true,
+  })
+);
+
 app.use(express.json({ limit: '100kb' }));
 
 app.use(
@@ -137,17 +147,6 @@ app.use(
   })
 );
 
-// CORS abierto solo en desarrollo (el sitio se sirve desde el mismo origen).
-if (process.env.NODE_ENV !== 'production') {
-  app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    if (req.method === 'OPTIONS') return res.sendStatus(204);
-    next();
-  });
-}
-
 // Log simple de peticiones.
 app.use((req, res, next) => {
   const inicio = Date.now();
@@ -159,50 +158,12 @@ app.use((req, res, next) => {
 });
 
 /* ------------------------------------------------------------------ */
-/* Sitio estático                                                      */
+/* Archivos subidos por los clientes                                   */
 /* ------------------------------------------------------------------ */
 
-app.use(
-  '/images',
-  express.static(path.join(ROOT, 'images'), { maxAge: '1d', fallthrough: true })
-);
-
+// Las imágenes de producto y el frontend ya no se sirven desde aquí.
+// Solo se conserva /uploads para las imágenes de personalizaciones.
 app.use('/uploads', express.static(UPLOAD_DIR, { maxAge: '7d', fallthrough: true }));
-
-app.get('/styles.css', (req, res) => {
-  res.sendFile(path.join(ROOT, 'styles.css'));
-});
-
-app.get('/favicon.svg', (req, res) => {
-  res.sendFile(path.join(ROOT, 'favicon.svg'));
-});
-
-app.use('/js', express.static(path.join(ROOT, 'js'), { maxAge: '1h' }));
-
-// Panel de administración (React compilado con Vite).
-app.use(
-  '/admin/assets',
-  express.static(path.join(ADMIN_DIST, 'assets'), { maxAge: '1y', immutable: true })
-);
-app.use('/admin', express.static(ADMIN_DIST, { index: false, fallthrough: true }));
-
-app.get(['/admin', '/admin/'], (req, res) => {
-  res.sendFile(path.join(ADMIN_DIST, 'index.html'), (error) => {
-    if (error && !res.headersSent) {
-      res
-        .status(503)
-        .send('El panel admin no está compilado. Ejecuta: cd client && npm install && npm run build');
-    }
-  });
-});
-
-app.get(['/', '/index.html'], (req, res) => {
-  res.sendFile(path.join(ROOT, 'index.html'));
-});
-
-app.get(['/catalogo', '/catalogo.html'], (req, res) => {
-  res.sendFile(path.join(ROOT, 'catalogo.html'));
-});
 
 /* ------------------------------------------------------------------ */
 /* API                                                                 */
@@ -546,7 +507,7 @@ app.use('/api', (req, res) => {
 });
 
 app.use((req, res) => {
-  res.status(404).sendFile(path.join(ROOT, 'index.html'));
+  res.status(404).json({ error: 'Ruta no encontrada', ruta: req.originalUrl });
 });
 
 // eslint-disable-next-line no-unused-vars
