@@ -2,9 +2,9 @@
 node_modules/
 package-lock.json
 
-# Build del panel admin
-client/dist/
-client/.vite/
+# Build del frontend
+frontend/dist/
+frontend/.vite/
 
 # Variables de entorno
 .env
