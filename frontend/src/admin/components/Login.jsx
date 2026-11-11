@@ -80,7 +80,7 @@ export default function Login({ onLogin }) {
           </button>
 
           <p className="login-demo">
-            Las credenciales demo están definidas en <code>server-dk/.env</code>.
+            Las credenciales del panel están definidas en <code>backend/.env</code>.
           </p>
         </form>
       </section>
