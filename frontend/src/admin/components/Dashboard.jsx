@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 
-import { api } from '../api.js';
+import { api } from '../../api.js';
 import Resumen from './Resumen.jsx';
 import Productos from './Productos.jsx';
 import Pedidos from './Pedidos.jsx';

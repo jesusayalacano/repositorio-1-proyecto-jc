@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { api } from '../api.js';
+import { api } from '../../api.js';
 import { Cargando, ErrorPanel, Vacio, formatoFecha } from './ui.jsx';
 
 export default function Mensajes({ onExpirado }) {

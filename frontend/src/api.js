@@ -1,13 +1,16 @@
-const BASE = '/api';
+const API_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+const BASE = `${API_URL}/api`;
 
 async function pedir(ruta, { body, ...opciones } = {}) {
   const config = {
     ...opciones,
-    credentials: 'same-origin',
+    credentials: 'include',
     headers: { ...opciones.headers },
   };
 
-  if (body !== undefined) {
+  if (body instanceof FormData) {
+    config.body = body;
+  } else if (body !== undefined) {
     config.headers['Content-Type'] = 'application/json';
     config.body = JSON.stringify(body);
   }
@@ -22,6 +25,22 @@ async function pedir(ruta, { body, ...opciones } = {}) {
   }
 
   return datos;
+}
+
+export function obtenerProductos() {
+  return pedir('/productos');
+}
+
+export function enviarContacto(datos) {
+  return pedir('/contacto', { method: 'POST', body: datos });
+}
+
+export function crearPersonalizacion(formData) {
+  return pedir('/personalizaciones', { method: 'POST', body: formData });
+}
+
+export function crearPedido(datos) {
+  return pedir('/pedidos', { method: 'POST', body: datos });
 }
 
 export const api = {
@@ -39,7 +58,7 @@ export const api = {
     pedir(`/admin/personalizaciones/${id}/estado`, { method: 'PUT', body: { estado } }),
 
   productos: {
-    listar: () => pedir('/productos'),
+    listar: obtenerProductos,
     crear: (producto) => pedir('/productos', { method: 'POST', body: producto }),
     actualizar: (id, producto) =>
       pedir(`/productos/${id}`, { method: 'PUT', body: producto }),

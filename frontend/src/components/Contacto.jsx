@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+import { enviarContacto } from '../api.js';
+
 const DATOS_INICIALES = {
   nombre: '',
   email: '',
@@ -8,15 +10,37 @@ const DATOS_INICIALES = {
 
 export default function Contacto() {
   const [datos, setDatos] = useState(DATOS_INICIALES);
+  const [enviando, setEnviando] = useState(false);
+  const [estado, setEstado] = useState('');
 
   function cambiarCampo(event) {
     const { name, value } = event.target;
     setDatos((anteriores) => ({ ...anteriores, [name]: value }));
   }
 
-  function enviar(event) {
-    // La conexión con la API se agrega en la Fase 5.
+  async function enviar(event) {
     event.preventDefault();
+    setEnviando(true);
+    setEstado('');
+
+    try {
+      await enviarContacto({
+        nombre: datos.nombre.trim(),
+        email: datos.email.trim(),
+        mensaje: datos.mensaje.trim(),
+      });
+
+      setDatos(DATOS_INICIALES);
+      setEstado('Mensaje enviado. Te respondemos pronto.');
+    } catch (fallo) {
+      setEstado(
+        fallo.message === 'Failed to fetch'
+          ? 'No se pudo enviar. Revisa la conexión.'
+          : fallo.message
+      );
+    } finally {
+      setEnviando(false);
+    }
   }
 
   return (
@@ -59,10 +83,12 @@ export default function Contacto() {
             onChange={cambiarCampo}
           />
         </label>
-        <button type="submit" className="btn-primario">
-          Enviar mensaje
+        <button type="submit" className="btn-primario" disabled={enviando}>
+          {enviando ? 'Enviando...' : 'Enviar mensaje'}
         </button>
-        <p id="contacto-estado" className="form-estado" role="status" />
+        <p id="contacto-estado" className="form-estado" role="status">
+          {estado}
+        </p>
       </form>
     </section>
   );

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { crearPersonalizacion } from '../api.js';
 import useBloquearScroll from '../hooks/useBloquearScroll.js';
 
 const TIPOS_IMAGEN = ['image/jpeg', 'image/png', 'image/webp'];
@@ -38,6 +39,8 @@ export default function PersonalizacionDialog({ abierto, tipo, onCerrar }) {
   const [colorPersonalizado, setColorPersonalizado] = useState('#d6ff3f');
   const [preview, setPreview] = useState('');
   const [estadoImagen, setEstadoImagen] = useState('');
+  const [enviando, setEnviando] = useState(false);
+  const [estado, setEstado] = useState('');
 
   const info = NOMBRES[tipo] || NOMBRES.camiseta;
 
@@ -104,15 +107,42 @@ export default function PersonalizacionDialog({ abierto, tipo, onCerrar }) {
     setColor(valor);
   }
 
+  function cerrar() {
+    setEstado('');
+    onCerrar();
+  }
+
   function cerrarAlHacerClic(event) {
     if (event.target === event.currentTarget) {
-      onCerrar();
+      cerrar();
     }
   }
 
-  function enviar(event) {
-    // La conexión con la API se agrega en la Fase 5.
+  async function enviar(event) {
     event.preventDefault();
+
+    const formulario = event.currentTarget;
+    setEnviando(true);
+    setEstado('');
+    setEstadoImagen('');
+
+    try {
+      await crearPersonalizacion(new FormData(formulario));
+
+      setDatos(DATOS_INICIALES);
+      setColor('Negro');
+      setColorPersonalizado('#d6ff3f');
+      limpiarImagen();
+      setEstado('Recibimos tu solicitud. Te contactamos para confirmar.');
+    } catch (fallo) {
+      setEstado(
+        fallo.message === 'Failed to fetch'
+          ? 'No se pudo enviar. Revisa la conexión.'
+          : fallo.message
+      );
+    } finally {
+      setEnviando(false);
+    }
   }
 
   return (
@@ -121,12 +151,12 @@ export default function PersonalizacionDialog({ abierto, tipo, onCerrar }) {
       id="dialogo-personalizar"
       className="dialogo-personalizar"
       aria-labelledby="personalizar-titulo"
-      onClose={onCerrar}
+      onClose={cerrar}
       onClick={cerrarAlHacerClic}
     >
       <div className="dialogo-cabecera">
         <h2 id="personalizar-titulo">{info.titulo}</h2>
-        <button type="button" className="dialogo-cerrar" id="cerrar-personalizar" onClick={onCerrar}>
+        <button type="button" className="dialogo-cerrar" id="cerrar-personalizar" onClick={cerrar}>
           Cerrar
         </button>
       </div>
@@ -273,10 +303,12 @@ export default function PersonalizacionDialog({ abierto, tipo, onCerrar }) {
           </p>
         </div>
 
-        <button type="submit" className="btn-primario" id="boton-personalizar">
-          Enviar solicitud
+        <button type="submit" className="btn-primario" id="boton-personalizar" disabled={enviando}>
+          {enviando ? 'Enviando...' : 'Enviar solicitud'}
         </button>
-        <p id="personalizar-estado" className="form-estado" role="status" />
+        <p id="personalizar-estado" className="form-estado" role="status">
+          {estado}
+        </p>
       </form>
     </dialog>
   );

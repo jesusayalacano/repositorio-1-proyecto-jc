@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { api } from '../api.js';
+import { api } from '../../api.js';
 import { Cargando, ErrorPanel, EstadoBadge, formatoFecha, formatoPrecio } from './ui.jsx';
 
 export default function Resumen({ onExpirado }) {

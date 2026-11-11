@@ -1,32 +1,28 @@
 import { useEffect, useState } from 'react';
 
+import { obtenerProductos } from './api.js';
 import AvisoCarrito from './components/AvisoCarrito.jsx';
 import CarritoDialog from './components/CarritoDialog.jsx';
 import CarritoFlotante from './components/CarritoFlotante.jsx';
 import CatalogoSeccion from './components/CatalogoSeccion.jsx';
 import Footer from './components/Footer.jsx';
 import HeaderCatalogo from './components/HeaderCatalogo.jsx';
-import productos from './data/productos.js';
 import { guardarCarrito, leerCarrito } from './utils/carrito.js';
 
-function buscarProducto(id) {
-  return productos.find((producto) => producto.id === id);
-}
-
-function carritoInicial() {
-  return leerCarrito().flatMap((item) => {
-    const producto = buscarProducto(item.id);
-    if (!producto || producto.stock <= 0) return [];
-
-    const cantidad = Math.min(item.cantidad, producto.stock);
-    return cantidad > 0 ? [{ id: item.id, cantidad }] : [];
-  });
-}
+const ERROR_CATALOGO = 'No se pudo cargar el catálogo. Revisa que el backend esté encendido.';
 
 export default function CatalogoApp() {
-  const [carrito, setCarrito] = useState(carritoInicial);
+  const [productos, setProductos] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState('');
+  const [carrito, setCarrito] = useState(leerCarrito);
   const [carritoAbierto, setCarritoAbierto] = useState(false);
   const [aviso, setAviso] = useState({ texto: '', id: 0 });
+  const [pedidoEstado, setPedidoEstado] = useState('');
+
+  function buscarProducto(id) {
+    return productos.find((producto) => producto.id === id);
+  }
 
   const itemsCarrito = carrito
     .map((item) => ({ ...item, producto: buscarProducto(item.id) }))
@@ -38,6 +34,40 @@ export default function CatalogoApp() {
     .filter((item) => item.cantidad > 0);
 
   const cantidadTotal = itemsCarrito.reduce((suma, item) => suma + item.cantidad, 0);
+
+  useEffect(() => {
+    let activo = true;
+
+    obtenerProductos()
+      .then((datos) => {
+        if (!activo) return;
+
+        const lista = Array.isArray(datos.productos) ? datos.productos : [];
+        setProductos(lista);
+        setCarrito((anteriores) =>
+          anteriores.flatMap((item) => {
+            const producto = lista.find((candidato) => candidato.id === item.id);
+            if (!producto || producto.stock <= 0) return [];
+
+            const cantidad = Math.min(item.cantidad, producto.stock);
+            return cantidad > 0 ? [{ id: item.id, cantidad }] : [];
+          })
+        );
+      })
+      .catch((fallo) => {
+        if (!activo) return;
+        setError(
+          fallo.message === 'Failed to fetch' ? ERROR_CATALOGO : fallo.message
+        );
+      })
+      .finally(() => {
+        if (activo) setCargando(false);
+      });
+
+    return () => {
+      activo = false;
+    };
+  }, []);
 
   useEffect(() => {
     guardarCarrito(carrito);
@@ -78,6 +108,7 @@ export default function CatalogoApp() {
       }
       return [...anteriores, { id, cantidad: 1 }];
     });
+    setPedidoEstado('');
     avisar(`Agregado: ${producto.nombre}`);
   }
 
@@ -109,13 +140,24 @@ export default function CatalogoApp() {
 
   function vaciarCarrito() {
     setCarrito([]);
+    setPedidoEstado('');
+  }
+
+  function pedidoRealizado() {
+    setCarrito([]);
+    avisar('Pedido recibido.');
   }
 
   return (
     <>
       <HeaderCatalogo />
       <main>
-        <CatalogoSeccion onAgregar={agregarAlCarrito} />
+        <CatalogoSeccion
+          productos={productos}
+          cargando={cargando}
+          error={error}
+          onAgregar={agregarAlCarrito}
+        />
       </main>
       <Footer id="contacto" enCatalogo />
       <CarritoFlotante cantidad={cantidadTotal} onAbrir={() => setCarritoAbierto(true)} />
@@ -123,10 +165,13 @@ export default function CatalogoApp() {
       <CarritoDialog
         abierto={carritoAbierto}
         items={itemsCarrito}
+        pedidoEstado={pedidoEstado}
         onCerrar={() => setCarritoAbierto(false)}
         onCambiarCantidad={cambiarCantidad}
         onEliminar={eliminarDelCarrito}
         onVaciar={vaciarCarrito}
+        onCambiarPedidoEstado={setPedidoEstado}
+        onPedidoRealizado={pedidoRealizado}
       />
     </>
   );

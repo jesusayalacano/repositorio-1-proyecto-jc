@@ -1,6 +1,5 @@
 import { useState } from 'react';
 
-import productos from '../data/productos.js';
 import ProductoCard from './ProductoCard.jsx';
 
 const CATEGORIAS = [
@@ -41,7 +40,7 @@ function actualizarUrl(filtro, busqueda) {
   history.replaceState(null, '', url);
 }
 
-export default function CatalogoSeccion({ onAgregar }) {
+export default function CatalogoSeccion({ productos, cargando, error, onAgregar }) {
   const [filtro, setFiltro] = useState(categoriaInicial);
   const [busqueda, setBusqueda] = useState(busquedaInicial);
 
@@ -83,7 +82,7 @@ export default function CatalogoSeccion({ onAgregar }) {
           />
         </label>
         <p id="resultado-conteo" className="resultado-conteo" aria-live="polite">
-          {visibles.length} de {productos.length} productos
+          {cargando || error ? '' : `${visibles.length} de ${productos.length} productos`}
         </p>
       </div>
 
@@ -107,7 +106,9 @@ export default function CatalogoSeccion({ onAgregar }) {
         ))}
       </div>
       <p id="catalogo-estado" className="catalogo-estado" role="status">
-        {visibles.length === 0 ? 'No hay productos con ese filtro.' : ''}
+        {cargando
+          ? 'Cargando productos...'
+          : error || (visibles.length === 0 ? 'No hay productos con ese filtro.' : '')}
       </p>
 
       <noscript>

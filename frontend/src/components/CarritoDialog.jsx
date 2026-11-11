@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { crearPedido } from '../api.js';
 import useBloquearScroll from '../hooks/useBloquearScroll.js';
 import { formatoPrecio } from '../utils/formato.js';
 import CarritoItem from './CarritoItem.jsx';
@@ -14,13 +15,17 @@ const DATOS_INICIALES = {
 export default function CarritoDialog({
   abierto,
   items,
+  pedidoEstado,
   onCerrar,
   onCambiarCantidad,
   onEliminar,
   onVaciar,
+  onCambiarPedidoEstado,
+  onPedidoRealizado,
 }) {
   const dialogoRef = useRef(null);
   const [datos, setDatos] = useState(DATOS_INICIALES);
+  const [enviando, setEnviando] = useState(false);
   const total = items.reduce((suma, item) => suma + item.producto.precio * item.cantidad, 0);
 
   useBloquearScroll(abierto);
@@ -49,9 +54,40 @@ export default function CarritoDialog({
     }
   }
 
-  function enviar(event) {
-    // La conexión con la API se agrega en la Fase 5.
+  async function enviar(event) {
     event.preventDefault();
+    if (items.length === 0) return;
+
+    setEnviando(true);
+    onCambiarPedidoEstado('');
+
+    const cuerpo = {
+      cliente: {
+        nombre: datos.nombre.trim(),
+        email: datos.email.trim(),
+        telefono: datos.telefono.trim(),
+        direccion: datos.direccion.trim(),
+      },
+      items: items.map((item) => ({
+        productoId: item.producto.id,
+        cantidad: item.cantidad,
+      })),
+    };
+
+    try {
+      await crearPedido(cuerpo);
+      setDatos(DATOS_INICIALES);
+      onCambiarPedidoEstado('Pedido recibido. Te contactamos para confirmar el pago y el envío.');
+      onPedidoRealizado();
+    } catch (fallo) {
+      onCambiarPedidoEstado(
+        fallo.message === 'Failed to fetch'
+          ? 'No se pudo enviar. Revisa la conexión.'
+          : fallo.message
+      );
+    } finally {
+      setEnviando(false);
+    }
   }
 
   return (
@@ -136,8 +172,8 @@ export default function CarritoDialog({
               />
             </label>
           </div>
-          <button id="boton-pedido" type="submit" className="btn-primario">
-            Hacer pedido
+          <button id="boton-pedido" type="submit" className="btn-primario" disabled={enviando}>
+            {enviando ? 'Enviando...' : 'Hacer pedido'}
           </button>
           <p className="form-nota">Te contactamos para confirmar el pago y el envío.</p>
         </form>
@@ -152,7 +188,9 @@ export default function CarritoDialog({
         </div>
       </div>
 
-      <p id="pedido-estado" className="carrito-estado" role="status" />
+      <p id="pedido-estado" className="carrito-estado" role="status">
+        {pedidoEstado}
+      </p>
     </dialog>
   );
 }

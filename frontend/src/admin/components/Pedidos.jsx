@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { api } from '../api.js';
+import { api } from '../../api.js';
 import {
   Cargando,
   ErrorPanel,

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { api } from './api.js';
+import { api } from '../api.js';
 import Login from './components/Login.jsx';
 import Dashboard from './components/Dashboard.jsx';
 
