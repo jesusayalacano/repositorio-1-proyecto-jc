@@ -3,7 +3,7 @@ node_modules/
 package-lock.json
 
 # Build del frontend
-frontend/dist/
+dist/
 frontend/.vite/
 
 # Variables de entorno

@@ -1,52 +1,161 @@
 # dunk labs
 
-Tienda de baloncesto. La página de inicio es HTML y CSS. El catálogo carga los productos desde una API hecha con Express y MongoDB Atlas.
+Tienda de baloncesto migrada a **React 19 + Vite** en el frontend y **Express 5 + MongoDB Atlas** en el backend.
+
+La aplicación tiene tres entradas:
+
+- `/` → página de inicio.
+- `/catalogo` → catálogo y carrito.
+- `/admin/` → panel de administración con login.
+
+## Tecnologías
+
+- React 19, Vite y JavaScript (sin TypeScript).
+- Express 5, `node --watch` y MongoDB con Mongoose.
+- CSS existente, conservado desde la versión anterior.
+- Sin React Router, Redux ni axios: las entradas son páginas HTML de Vite y las llamadas a la API están en `frontend/src/api.js`.
+
+## Estructura
+
+```text
+backend/
+  src/             API, modelos, rutas y middlewares
+  scripts/         seed de productos y creación del administrador
+  data/            productos iniciales para el seed
+  uploads/         imágenes subidas en personalizaciones (no se versionan)
+frontend/
+  src/             componentes React, admin y llamadas a la API
+  public/images/   imágenes de los productos
+  index.html       entrada de la página de inicio
+  catalogo.html    entrada del catálogo
+  admin/index.html entrada del panel
+```
+
+## Requisitos
+
+- Node.js 18 o superior.
+- npm.
+- MongoDB Atlas (o una instancia de MongoDB compatible).
+- Dos terminales: una para el backend y otra para el frontend.
+
+## Instalación
+
+### 1. Backend
+
+```bash
+cd backend
+npm install
+```
+
+Crea el archivo de variables de entorno:
+
+```bash
+cp .env.example .env
+```
+
+En Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Edita `backend/.env` con tu cadena de MongoDB y tus datos de administrador. No subas ese archivo a Git.
+
+Carga los productos y crea el administrador:
+
+```bash
+npm run seed
+npm run crear-admin
+```
+
+### 2. Frontend
+
+```bash
+cd frontend
+npm install
+cp .env.example .env
+```
+
+En Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+El archivo `frontend/.env` debe apuntar al backend:
+
+```env
+VITE_API_URL=http://localhost:3000
+```
 
 ## Cómo correrlo
 
-```bash
-cd server-dk
-npm install
-npm run seed
-npm run crear-admin   # requiere ADMIN_EMAIL y ADMIN_PASSWORD en .env
-npm run build:admin   # compila el panel React
-npm start
-```
+Abre dos terminales.
 
-Abrir `http://localhost:3000`. El catálogo está en `http://localhost:3000/catalogo` y el panel admin en `http://localhost:3000/admin`.
-
-El catálogo necesita el servidor porque los productos se piden a `/api/productos`. Si se abre el HTML con doble clic, no carga.
-
-## MongoDB Atlas
-
-1. Crear un clúster gratuito M0 en Atlas.
-2. Crear un usuario de base de datos con permisos de lectura y escritura.
-3. En **Network Access**, permitir la IP desde donde se va a conectar.
-4. Copiar la cadena `mongodb+srv://...` desde **Connect → Drivers**.
-5. Crear `server-dk/.env` a partir de `server-dk/.env.example`.
-
-El `.env` debe tener:
-
-```env
-PORT=3000
-NODE_ENV=development
-MONGODB_URI=mongodb+srv://usuario:clave@cluster.mongodb.net/dunklabs?retryWrites=true&w=majority
-MONGODB_DB=dunklabs
-SESSION_SECRET=una-cadena-larga-y-aleatoria
-ADMIN_NOMBRE=Administrador Dunk Labs
-ADMIN_EMAIL=admin@dunklabs.co
-ADMIN_PASSWORD=define-una-contraseña-segura
-```
-
-El archivo `.env` no se sube a Git.
-
-Para cargar los 30 productos:
+**Terminal 1 — backend:**
 
 ```bash
+cd backend
+npm run dev
+```
+
+**Terminal 2 — frontend:**
+
+```bash
+cd frontend
+npm run dev
+```
+
+Abre:
+
+- Inicio: <http://localhost:5173/>
+- Catálogo: <http://localhost:5173/catalogo>
+- Admin: <http://localhost:5173/admin/>
+
+La API queda en <http://localhost:3000/api/productos>.
+
+> El catálogo no funciona abriendo `index.html` o `catalogo.html` con doble clic. Necesita Vite y el backend encendidos.
+
+## Variables de entorno
+
+### `backend/.env`
+
+| Variable | Uso |
+| --- | --- |
+| `PORT` | Puerto del backend. Por defecto `3000`. |
+| `NODE_ENV` | `development` o `production`. |
+| `FRONTEND_URL` | Origen permitido para CORS. Por defecto `http://localhost:5173`. |
+| `MONGODB_URI` | Cadena de conexión de MongoDB Atlas. |
+| `MONGODB_DB` | Nombre de la base de datos. Por defecto `dunklabs`. |
+| `SESSION_SECRET` | Clave larga y aleatoria para firmar la sesión. |
+| `ADMIN_NOMBRE` | Nombre visible del administrador. |
+| `ADMIN_EMAIL` | Correo del administrador. |
+| `ADMIN_PASSWORD` | Contraseña del administrador. |
+
+Los archivos `backend/.env` y `frontend/.env` no se versionan.
+
+### `frontend/.env`
+
+| Variable | Uso |
+| --- | --- |
+| `VITE_API_URL` | URL base del backend, sin `/api` al final. |
+
+## MongoDB
+
+1. Crea un clúster en MongoDB Atlas.
+2. Crea un usuario de base de datos con permisos de lectura y escritura.
+3. Permite la IP desde la que te vas a conectar.
+4. Copia la cadena `mongodb+srv://...` en `MONGODB_URI`.
+5. Mantén `MONGODB_DB=dunklabs` para usar la misma base del proyecto.
+
+El seed se puede ejecutar varias veces sin duplicar productos:
+
+```bash
+cd backend
 npm run seed
 ```
 
-El seed se puede correr varias veces sin duplicar productos. Si se cambió `data/productos.json` y se quieren actualizar los existentes:
+Si cambias `backend/data/productos.json` y quieres sobrescribir los productos existentes:
 
 ```bash
 npm run seed -- --force
@@ -54,99 +163,33 @@ npm run seed -- --force
 
 ## Panel de administración
 
-El panel está hecho con React y Vite en `client/`. Se sirve en `http://localhost:3000/admin`.
-
-Credenciales de demostración:
-
-```text
-Correo:     admin@dunklabs.co
-Contraseña: la definida en server-dk/.env (ADMIN_PASSWORD)
-```
-
-El usuario se crea (o se actualiza) con:
+El correo y la contraseña se crean con:
 
 ```bash
-cd server-dk
+cd backend
 npm run crear-admin
 ```
 
-Toma `ADMIN_EMAIL`, `ADMIN_PASSWORD` y `ADMIN_NOMBRE` del `.env`. **Cambia estas credenciales antes de publicar el sitio.**
+Toma los valores `ADMIN_EMAIL`, `ADMIN_PASSWORD` y `ADMIN_NOMBRE` de `backend/.env`. No hay credenciales escritas en el código ni en este README.
 
-### Compilar el panel
+El panel usa una cookie de sesión. Por eso las peticiones del frontend se hacen con `credentials: 'include'` y el backend permite el origen configurado en `FRONTEND_URL`.
+
+## Build y verificaciones
 
 ```bash
-cd client
-npm install
+cd frontend
+npm run lint
 npm run build
 ```
 
-También se puede compilar desde `server-dk` con `npm run build:admin`.
+El build queda en `frontend/dist/`. Para producción, sirve ese contenido con un servidor estático y configura `VITE_API_URL` con la URL pública del backend.
 
-### Desarrollo con recarga
+## Notas de la migración
 
-```bash
-cd server-dk
-npm start        # API en el puerto 3000
-```
+- Las imágenes de producto están en `frontend/public/images/`.
+- Las imágenes de personalizaciones se guardan en `backend/uploads/` y se sirven desde `/uploads`.
+- El carrito se guarda en `localStorage`; el backend valida precios y stock al crear el pedido.
+- Los filtros y la búsqueda del catálogo actualizan la URL sin recargar la página.
+- La versión anterior en HTML, CSS y JavaScript se conserva en `_vanilla-original/` como referencia. La aplicación activa es la de `frontend/`.
 
-```bash
-cd client
-npm run dev      # Vite en el puerto 5173 con proxy a /api
-```
-
-El panel incluye:
-
-- Login con sesión en cookie `httpOnly` y contraseña hasheada con bcrypt.
-- Resumen con productos, pedidos pendientes, mensajes y personalizaciones.
-- CRUD de productos (la imagen se indica con una ruta `/images/...` o una URL).
-- Pedidos con cambio de estado.
-- Mensajes de contacto.
-- Personalizaciones con vista previa de la imagen y cambio de estado.
-
-## API
-
-Públicas:
-
-- `GET /api/health`
-- `GET /api/productos` (acepta `categoria`, `q` y `disponible`)
-- `GET /api/productos/:id`
-- `POST /api/pedidos`
-- `POST /api/contacto`
-- `POST /api/personalizaciones` (multipart: `tipo`, `nombre`, `email`, `telefono`, `talla`, `color`, `detalle`, `notas` e `imagen` opcional)
-
-Autenticación:
-
-- `POST /api/auth/login`
-- `POST /api/auth/logout`
-- `GET /api/auth/me`
-
-Protegidas (requieren sesión de administrador):
-
-- `POST /api/productos`
-- `PUT /api/productos/:id`
-- `DELETE /api/productos/:id`
-- `GET /api/pedidos`
-- `GET /api/pedidos/:id`
-- `GET /api/admin/resumen`
-- `PUT /api/admin/pedidos/:id/estado`
-- `GET /api/admin/mensajes`
-- `GET /api/admin/personalizaciones`
-- `PUT /api/admin/personalizaciones/:id/estado`
-
-## Personalización
-
-Los botones de camiseta y zapatillas abren un formulario para elegir color, talla y subir una imagen de referencia. La solicitud se guarda en MongoDB y la imagen en `server-dk/uploads`.
-
-La carpeta `server-dk/uploads` está ignorada por Git. Para publicar en un servidor con disco temporal hay que mover las imágenes a un servicio como Cloudinary.
-
-## Datos
-
-Los productos se cargan desde `server-dk/data/productos.json` hacia la colección `productos` de MongoDB. Los pedidos, mensajes y personalizaciones se guardan en las colecciones `pedidos`, `mensajes` y `personalizaciones`.
-
-## Pendiente
-
-- Asistente con IA.
-- Publicar el sitio en internet.
-- Guardar las imágenes en Cloudinary o S3.
-- Pruebas automatizadas dentro del repositorio.
-- Cambiar las credenciales demo del panel antes de publicar.
+Consulta `CAMBIOS.md` para ver el detalle de qué cambió respecto a la versión anterior.
