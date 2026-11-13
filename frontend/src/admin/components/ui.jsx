@@ -17,9 +17,17 @@ export const ESTADOS_PEDIDO = [
 
 export const ESTADOS_PERSONALIZACION = ['pendiente', 'contactado', 'cerrado'];
 
+const API_URL = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
+
 export function urlImagen(valor) {
   if (!valor) return '';
-  if (/^(https?:)?\/\//i.test(valor) || valor.startsWith('/') || valor.startsWith('data:')) {
+  if (/^(https?:)?\/\//i.test(valor) || valor.startsWith('data:')) {
+    return valor;
+  }
+  if (valor.startsWith('/uploads/')) {
+    return `${API_URL}${valor}`;
+  }
+  if (valor.startsWith('/')) {
     return valor;
   }
   return `/${valor}`;

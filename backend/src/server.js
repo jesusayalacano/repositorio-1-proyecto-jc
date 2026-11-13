@@ -39,8 +39,13 @@ const app = express();
 
 const PORT = Number(process.env.PORT) || 3000;
 const UPLOAD_DIR = path.join(__dirname, '..', 'uploads');
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+const ES_PRODUCCION = process.env.NODE_ENV === 'production';
+const FRONTEND_URL = (process.env.FRONTEND_URL || 'http://localhost:5173').trim().replace(/\/$/, '');
 const SESSION_TTL = 8 * 60 * 60; // 8 horas en segundos
+
+if (ES_PRODUCCION && !process.env.SESSION_SECRET) {
+  throw new Error('Falta SESSION_SECRET. Configúrala en las variables de entorno de producción.');
+}
 
 const sessionStore = process.env.MONGODB_URI
   ? MongoStore.create({
@@ -116,12 +121,12 @@ const subirImagen = multer({
 
 app.disable('x-powered-by');
 
-if (process.env.NODE_ENV === 'production') {
+if (ES_PRODUCCION) {
   app.set('trust proxy', 1);
 }
 
 // El frontend vive en Vite (5173) y la API en otro puerto. Se permite el
-// origen configurado y el envío de la cookie de sesión del panel admin.
+// origen configurado y el envío de la cookie de sesión.
 app.use(
   cors({
     origin: FRONTEND_URL,
@@ -140,8 +145,10 @@ app.use(
     store: sessionStore,
     cookie: {
       httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
+      // En Render el frontend y la API viven en dominios distintos.
+      // SameSite=None permite enviar la cookie en esas peticiones cruzadas.
+      sameSite: ES_PRODUCCION ? 'none' : 'lax',
+      secure: ES_PRODUCCION,
       maxAge: SESSION_TTL * 1000,
     },
   })

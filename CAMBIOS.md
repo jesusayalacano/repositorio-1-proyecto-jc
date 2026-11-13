@@ -65,6 +65,16 @@ La versión anterior se conserva en `_vanilla-original/`; la aplicación activa 
 - Un cliente autenticado recibe `403` al intentar entrar a `/api/admin/resumen`.
 - Los registros creados durante las pruebas se eliminaron de MongoDB.
 
+## Despliegue en Render
+
+- `render.yaml` define el Web Service del backend y el Static Site del frontend.
+- El frontend usa rewrites para `/catalogo`, `/cuenta` y `/admin/*`.
+- En producción la cookie usa `Secure` y `SameSite=None` para funcionar entre subdominios.
+- `VITE_API_URL` apunta al backend y `FRONTEND_URL` al frontend; ambos se configuran en `render.yaml`.
+- Las imágenes de `/uploads` se solicitan al backend usando `VITE_API_URL`.
+- Las imágenes de personalizaciones en Render son temporales porque el disco del Web Service no es persistente.
+- Build de producción con `VITE_API_URL=https://dunklabs-api-jc.onrender.com` y cookie de producción verificada con `X-Forwarded-Proto: https`.
+
 ## Dudas y cosas a tener en cuenta
 
 - **Usa `localhost`, no `127.0.0.1`,** para abrir el frontend. El backend permite por defecto `http://localhost:5173` en `FRONTEND_URL`. Si usas otro origen, cámbialo en `backend/.env`.

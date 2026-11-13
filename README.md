@@ -14,6 +14,7 @@ La aplicación tiene cuatro entradas:
 - React 19, Vite y JavaScript (sin TypeScript).
 - Express 5, `node --watch` y MongoDB con Mongoose.
 - CSS existente, conservado desde la versión anterior.
+- Render para publicar el frontend estático y la API.
 - Sin React Router, Redux ni axios: las entradas son páginas HTML de Vite y las llamadas a la API están en `frontend/src/api.js`.
 
 ## Estructura
@@ -31,6 +32,7 @@ frontend/
   catalogo.html    entrada del catálogo
   cuenta.html      entrada de la cuenta de clientes
   admin/index.html entrada del panel
+render.yaml        Blueprint de Render para API + frontend
 ```
 
 ## Requisitos
@@ -199,10 +201,106 @@ npm run build
 
 El build queda en `frontend/dist/`. Para producción, sirve ese contenido con un servidor estático y configura `VITE_API_URL` con la URL pública del backend.
 
+## Despliegue en Render
+
+El repositorio incluye `render.yaml` con dos servicios:
+
+- `dunklabs-api-jc`: Web Service de Express.
+- `dunklabs-web-jc`: Static Site de React/Vite.
+
+### 1. Preparar MongoDB Atlas
+
+En MongoDB Atlas entra a **Network Access** y permite la conexión desde Render. Para una entrega rápida puedes usar `0.0.0.0/0`; si quieres restringirlo, agrega las IP de salida de Render.
+
+Conserva la base `dunklabs` y ten a mano la cadena `mongodb+srv://...` de `MONGODB_URI`.
+
+### 2. Crear el Blueprint
+
+1. En Render, entra a **New > Blueprint**.
+2. Conecta el repositorio `jesusayalacano/repositorio-1-proyecto-jc`.
+3. Render leerá `render.yaml` y creará los dos servicios.
+4. Cuando lo pida, pega `MONGODB_URI`. `SESSION_SECRET` se genera automáticamente.
+
+Si los nombres `dunklabs-api-jc` o `dunklabs-web-jc` ya están ocupados, Render no podrá crear el Blueprint. En ese caso cambia los nombres en `render.yaml` y actualiza también:
+
+- `FRONTEND_URL` del backend.
+- `VITE_API_URL` del frontend.
+
+### 3. Variables del backend
+
+El Web Service usa estas variables:
+
+```env
+NODE_ENV=production
+MONGODB_URI=tu_cadena_de_atlas
+MONGODB_DB=dunklabs
+SESSION_SECRET=generada_por_render
+FRONTEND_URL=https://dunklabs-web-jc.onrender.com
+```
+
+`FRONTEND_URL` debe ser la URL exacta del frontend, sin `/` al final.
+
+### 4. Variables del frontend
+
+El Static Site compila con:
+
+```env
+VITE_API_URL=https://dunklabs-api-jc.onrender.com
+```
+
+No incluyas `/api` al final: `frontend/src/api.js` la agrega. `VITE_API_URL` se fija al construir el frontend; si cambias la URL del backend, vuelve a desplegar el Static Site.
+
+### 5. Rutas del frontend
+
+`render.yaml` configura los rewrites para que estas rutas funcionen en el dominio estático:
+
+- `/catalogo` → `/catalogo.html`
+- `/cuenta` → `/cuenta.html`
+- `/admin`, `/admin/` y `/admin/*` → `/admin/index.html`
+- Cualquier ruta desconocida → `/index.html`
+
+### 6. Sesión y CORS en producción
+
+Con `NODE_ENV=production` la cookie se marca `Secure` y `SameSite=None`, necesaria porque el frontend y la API quedan en subdominios distintos de Render. El backend también usa `trust proxy` para reconocer HTTPS.
+
+Las peticiones usan `credentials: 'include'` y el backend solo permite el origen configurado en `FRONTEND_URL`. Si cambias de dominio, actualiza esa variable.
+
+### 7. Crear el administrador
+
+El servidor no crea el usuario administrador automáticamente. Puedes crearlo desde tu equipo apuntando `backend/.env` a la misma base de Atlas:
+
+```bash
+cd backend
+npm run crear-admin
+```
+
+También puedes ejecutar ese comando desde la Shell del Web Service en Render, siempre que `MONGODB_URI`, `ADMIN_EMAIL` y `ADMIN_PASSWORD` estén configuradas.
+
+### 8. Verificar el despliegue
+
+Abre:
+
+- `https://dunklabs-web-jc.onrender.com/`
+- `https://dunklabs-web-jc.onrender.com/catalogo`
+- `https://dunklabs-web-jc.onrender.com/cuenta`
+- `https://dunklabs-web-jc.onrender.com/admin/`
+- `https://dunklabs-api-jc.onrender.com/api/health`
+
+Prueba registro, login de cliente, login de admin y un pedido.
+
+### Limitaciones del plan gratuito
+
+- El Web Service gratuito puede dormir; la primera petición puede tardar.
+- El disco del backend es temporal: las imágenes de `backend/uploads/` pueden perderse al reiniciar o redesplegar. Para conservarlas, usa un disco persistente de Render o un servicio como Cloudinary.
+- El Static Site sigue disponible aunque el backend esté dormido; las llamadas a la API despertarán el backend.
+
+No subas `backend/.env` ni `frontend/.env` a Git. Los secretos se configuran en Render.
+
 ## Notas de la migración
 
 - Las imágenes de producto están en `frontend/public/images/`.
-- Las imágenes de personalizaciones se guardan en `backend/uploads/` y se sirven desde `/uploads`.
+- Las imágenes de personalizaciones se guardan en `backend/uploads/` y se sirven desde `/uploads`. En el panel admin, las rutas `/uploads/...` se prefijan con `VITE_API_URL` para que funcionen cuando el frontend está en otro dominio.
+- En Render, `backend/uploads/` es temporal; revisa la sección de despliegue si necesitas conservar esas imágenes.
 - El carrito se guarda en `localStorage`; el backend valida precios y stock al crear el pedido.
 - Los filtros y la búsqueda del catálogo actualizan la URL sin recargar la página.
 - La versión anterior en HTML, CSS y JavaScript se conserva en `_vanilla-original/` como referencia. La aplicación activa es la de `frontend/`.
