@@ -47,6 +47,7 @@ export const api = {
   me: () => pedir('/auth/me'),
   login: (email, password) =>
     pedir('/auth/login', { method: 'POST', body: { email, password } }),
+  registro: (datos) => pedir('/auth/registro', { method: 'POST', body: datos }),
   logout: () => pedir('/auth/logout', { method: 'POST' }),
 
   resumen: () => pedir('/admin/resumen'),

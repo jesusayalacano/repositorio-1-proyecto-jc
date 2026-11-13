@@ -17,6 +17,7 @@ export default defineConfig({
         inicio: resolve(raiz, 'index.html'),
         catalogo: resolve(raiz, 'catalogo.html'),
         admin: resolve(raiz, 'admin/index.html'),
+        cuenta: resolve(raiz, 'cuenta.html'),
       },
     },
   },

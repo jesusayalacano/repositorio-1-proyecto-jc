@@ -19,6 +19,7 @@ export default function Footer({ id, enCatalogo = false }) {
           <p className="footer-titulo">Explora</p>
           <a href="/">Inicio</a>
           <a href="/catalogo">Catálogo</a>
+          <a href="/cuenta">Mi cuenta</a>
           <a href={`${prefijo}personalizacion`}>Personalización</a>
           <a href={`${prefijo}contacto`}>Contacto</a>
           <a href="/admin/">Panel admin</a>

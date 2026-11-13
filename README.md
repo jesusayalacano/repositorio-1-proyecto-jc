@@ -2,10 +2,11 @@
 
 Tienda de baloncesto migrada a **React 19 + Vite** en el frontend y **Express 5 + MongoDB Atlas** en el backend.
 
-La aplicación tiene tres entradas:
+La aplicación tiene cuatro entradas:
 
 - `/` → página de inicio.
 - `/catalogo` → catálogo y carrito.
+- `/cuenta` → registro e inicio de sesión de clientes.
 - `/admin/` → panel de administración con login.
 
 ## Tecnologías
@@ -28,6 +29,7 @@ frontend/
   public/images/   imágenes de los productos
   index.html       entrada de la página de inicio
   catalogo.html    entrada del catálogo
+  cuenta.html      entrada de la cuenta de clientes
   admin/index.html entrada del panel
 ```
 
@@ -110,6 +112,7 @@ Abre:
 
 - Inicio: <http://localhost:5173/>
 - Catálogo: <http://localhost:5173/catalogo>
+- Cuenta de clientes: <http://localhost:5173/cuenta>
 - Admin: <http://localhost:5173/admin/>
 
 La API queda en <http://localhost:3000/api/productos>.
@@ -173,6 +176,18 @@ npm run crear-admin
 Toma los valores `ADMIN_EMAIL`, `ADMIN_PASSWORD` y `ADMIN_NOMBRE` de `backend/.env`. No hay credenciales escritas en el código ni en este README.
 
 El panel usa una cookie de sesión. Por eso las peticiones del frontend se hacen con `credentials: 'include'` y el backend permite el origen configurado en `FRONTEND_URL`.
+
+## Cuenta de clientes
+
+La página `/cuenta` permite registrarse e iniciar sesión con nombre, correo y contraseña. Los usuarios creados desde el formulario se guardan con el rol `cliente` y no tienen acceso al panel de administración.
+
+El registro es público y no requiere verificación por correo. Para probarlo:
+
+1. Abre <http://localhost:5173/cuenta>.
+2. Pulsa “Crear cuenta”.
+3. Completa el formulario y vuelve a iniciar sesión si cierras la sesión.
+
+El login de clientes comparte la misma cookie de sesión que el admin, pero las rutas `/api/admin` siguen exigiendo el rol `admin`.
 
 ## Build y verificaciones
 

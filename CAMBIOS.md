@@ -10,6 +10,7 @@ La versión anterior se conserva en `_vanilla-original/`; la aplicación activa 
 | --- | --- | --- |
 | `index.html` | `frontend/index.html` + `frontend/src/App.jsx` | La página de inicio ahora monta componentes React en `#root`. |
 | `catalogo.html` | `frontend/catalogo.html` + `frontend/src/CatalogoApp.jsx` | El catálogo es una entrada separada de Vite, sin React Router. |
+| Login de clientes (nuevo) | `frontend/cuenta.html` + `frontend/src/CuentaApp.jsx` | Registro e inicio de sesión de clientes, separado del panel de administración. |
 | `styles.css` | `frontend/src/index.css` | Se conservaron las clases, variables y el diseño. |
 | `js/inicio.js` | `frontend/src/components/Contacto.jsx`, `PersonalizacionDialog.jsx` y `frontend/src/api.js` | Los formularios usan estado de React y llaman a la API centralizada. |
 | `js/catalogo.js` | `CatalogoApp.jsx`, `CatalogoSeccion.jsx`, `ProductoCard.jsx`, `CarritoDialog.jsx` y `utils/carrito.js` | El catálogo, los filtros y el carrito usan estado de React y `localStorage`. |
@@ -32,6 +33,7 @@ La versión anterior se conserva en `_vanilla-original/`; la aplicación activa 
 | Contacto | `fetch('/api/contacto')` dentro de `inicio.js`. | `enviarContacto()` en `api.js` y estado del formulario. |
 | Personalización | `FormData` con archivo y `fetch` directo. | `crearPersonalizacion()` en `api.js`; el archivo sigue enviándose con `FormData`. |
 | Admin | Archivo de API propio con `credentials: 'same-origin'`. | Todo usa `api.js`, `VITE_API_URL` y `credentials: 'include'`. |
+| Cuenta de cliente | No existía. | `POST /api/auth/registro` crea usuarios con rol `cliente`; `/cuenta` permite registrarse, iniciar sesión y cerrar sesión. |
 
 ## Conceptos de React usados
 
@@ -45,7 +47,7 @@ La versión anterior se conserva en `_vanilla-original/`; la aplicación activa 
 ## Qué se conservó
 
 - El diseño, los textos, las clases CSS y los identificadores principales.
-- Las tres entradas separadas: inicio, catálogo y admin.
+- Las cuatro entradas separadas: inicio, catálogo, cuenta de clientes y admin.
 - MongoDB Atlas, la base `dunklabs`, los modelos y los datos.
 - La autenticación del admin con cookie de sesión.
 - La validación de stock y precios en el backend.
@@ -59,6 +61,8 @@ La versión anterior se conserva en `_vanilla-original/`; la aplicación activa 
 - Contacto: envío correcto y mensaje de confirmación.
 - Personalización: envío correcto sin imagen y mensaje de confirmación.
 - Admin: login correcto y carga del resumen.
+- Cuenta de cliente: registro correcto con rol `cliente`, login, sesión y logout.
+- Un cliente autenticado recibe `403` al intentar entrar a `/api/admin/resumen`.
 - Los registros creados durante las pruebas se eliminaron de MongoDB.
 
 ## Dudas y cosas a tener en cuenta
@@ -71,4 +75,3 @@ La versión anterior se conserva en `_vanilla-original/`; la aplicación activa 
 - El carrito vive en el navegador (`localStorage`). El backend vuelve a validar el stock y toma los precios del catálogo al crear el pedido.
 - La búsqueda y los filtros cambian la URL sin recargar la página, pero no se usa React Router.
 - La versión vanilla se movió a `_vanilla-original/` para conservarla como referencia sin mezclarla con la aplicación React.
-- `MIGRACION_REACT.md` es un documento de trabajo y no se ha añadido a Git.

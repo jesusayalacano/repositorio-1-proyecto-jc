@@ -24,6 +24,9 @@ export default function Header() {
           <li>
             <a href="#contacto">Contacto</a>
           </li>
+          <li>
+            <a href="/cuenta">Mi cuenta</a>
+          </li>
         </ul>
       </nav>
       <a href="/catalogo" className="btn-catalogo">
