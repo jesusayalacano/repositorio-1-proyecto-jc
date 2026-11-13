@@ -34,6 +34,7 @@ La versión anterior se conserva en `_vanilla-original/`; la aplicación activa 
 | Personalización | `FormData` con archivo y `fetch` directo. | `crearPersonalizacion()` en `api.js`; el archivo sigue enviándose con `FormData`. |
 | Admin | Archivo de API propio con `credentials: 'same-origin'`. | Todo usa `api.js`, `VITE_API_URL` y `credentials: 'include'`. |
 | Cuenta de cliente | No existía. | `POST /api/auth/registro` crea usuarios con rol `cliente`; `/cuenta` permite registrarse, iniciar sesión y cerrar sesión. |
+| Cabecera | Los enlaces se envolvían en varias filas en móvil. | Menú hamburguesa hasta 850 px y navegación compacta hasta 1199 px; en escritorio se mantiene la navegación completa. |
 
 ## Conceptos de React usados
 
@@ -63,6 +64,7 @@ La versión anterior se conserva en `_vanilla-original/`; la aplicación activa 
 - Admin: login correcto y carga del resumen.
 - Cuenta de cliente: registro correcto con rol `cliente`, login, sesión y logout.
 - Un cliente autenticado recibe `403` al intentar entrar a `/api/admin/resumen`.
+- Cabecera probada a 360, 390, 768, 850, 851, 1024, 1199 y 1200 px; el menú móvil abre y cierra con el botón, `Escape`, un toque fuera y el cambio a escritorio.
 - Los registros creados durante las pruebas se eliminaron de MongoDB.
 
 ## Despliegue en Render

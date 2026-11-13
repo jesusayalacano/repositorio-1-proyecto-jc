@@ -1,31 +1,15 @@
+import HeaderBase from './HeaderBase.jsx';
+
+const ENLACES = [
+  { href: '/', texto: 'Inicio' },
+  { href: '/#personalizacion', texto: 'Personalización' },
+  { href: '/#ofertas', texto: 'Ofertas' },
+  { href: '/#contacto', texto: 'Contacto' },
+  { href: '/cuenta', texto: 'Mi cuenta' },
+];
+
+const CTA = { href: '/', texto: 'Volver al inicio' };
+
 export default function HeaderCatalogo() {
-  return (
-    <header>
-      <h1>
-        <a href="/">dunk labs</a>
-      </h1>
-      <nav>
-        <ul>
-          <li>
-            <a href="/">Inicio</a>
-          </li>
-          <li>
-            <a href="/#personalizacion">Personalización</a>
-          </li>
-          <li>
-            <a href="/#ofertas">Ofertas</a>
-          </li>
-          <li>
-            <a href="/#contacto">Contacto</a>
-          </li>
-          <li>
-            <a href="/cuenta">Mi cuenta</a>
-          </li>
-        </ul>
-      </nav>
-      <a href="/" className="btn-catalogo">
-        Volver al inicio
-      </a>
-    </header>
-  );
+  return <HeaderBase enlaces={ENLACES} cta={CTA} />;
 }
