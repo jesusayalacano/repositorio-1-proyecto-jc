@@ -35,6 +35,10 @@ export function enviarContacto(datos) {
   return pedir('/contacto', { method: 'POST', body: datos });
 }
 
+export function enviarChat(mensajes) {
+  return pedir('/chat', { method: 'POST', body: { mensajes } });
+}
+
 export function crearPersonalizacion(formData) {
   return pedir('/personalizaciones', { method: 'POST', body: formData });
 }

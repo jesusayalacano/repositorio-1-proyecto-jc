@@ -5,6 +5,7 @@ import AvisoCarrito from './components/AvisoCarrito.jsx';
 import CarritoDialog from './components/CarritoDialog.jsx';
 import CarritoFlotante from './components/CarritoFlotante.jsx';
 import CatalogoSeccion from './components/CatalogoSeccion.jsx';
+import Chatbot from './components/Chatbot.jsx';
 import Footer from './components/Footer.jsx';
 import HeaderCatalogo from './components/HeaderCatalogo.jsx';
 import { guardarCarrito, leerCarrito } from './utils/carrito.js';
@@ -173,6 +174,7 @@ export default function CatalogoApp() {
         onCambiarPedidoEstado={setPedidoEstado}
         onPedidoRealizado={pedidoRealizado}
       />
+      <Chatbot />
     </>
   );
 }

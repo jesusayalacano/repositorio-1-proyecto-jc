@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { api } from './api.js';
+import Chatbot from './components/Chatbot.jsx';
 import CuentaAcceso from './components/CuentaAcceso.jsx';
 import CuentaPanel from './components/CuentaPanel.jsx';
 import Footer from './components/Footer.jsx';
@@ -83,6 +84,7 @@ export default function CuentaApp() {
         </section>
       </main>
       <Footer enCatalogo />
+      <Chatbot />
     </>
   );
 }

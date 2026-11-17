@@ -10,6 +10,9 @@
  *   FRONTEND_URL  Origen permitido para el frontend de Vite
  *   MONGODB_URI   Cadena de conexión de MongoDB Atlas
  *   MONGODB_DB    Nombre de la base de datos (por defecto dunklabs)
+ *   OPENAI_API_KEY Clave de OpenAI para DunkBot (solo backend)
+ *   OPENAI_MODEL   Modelo de OpenAI (por defecto gpt-4o-mini)
+ *   OPENAI_BASE_URL URL base de OpenAI (por defecto https://api.openai.com/v1)
  */
 
 const path = require('node:path');
@@ -30,6 +33,7 @@ const { CATEGORIAS, TIPOS_PERSONALIZACION } = require('./constantes');
 const { requiereAdmin } = require('./middleware/auth');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
+const chatRoutes = require('./routes/chat');
 const Producto = require('./models/Producto');
 const Pedido = require('./models/Pedido');
 const Mensaje = require('./models/Mensaje');
@@ -193,6 +197,10 @@ app.use('/api/auth', authRoutes);
 /* ------------------------- Administración -------------------------- */
 
 app.use('/api/admin', adminRoutes);
+
+/* --------------------------- DunkBot ------------------------------ */
+
+app.use('/api/chat', chatRoutes);
 
 /* --------------------------- Productos ---------------------------- */
 

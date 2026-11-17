@@ -136,6 +136,9 @@ La API queda en <http://localhost:3000/api/productos>.
 | `ADMIN_NOMBRE` | Nombre visible del administrador. |
 | `ADMIN_EMAIL` | Correo del administrador. |
 | `ADMIN_PASSWORD` | Contraseña del administrador. |
+| `OPENAI_API_KEY` | Clave de OpenAI para DunkBot. Vive solo en el backend; sin ella `/api/chat` responde `503`. |
+| `OPENAI_MODEL` | Modelo de OpenAI. Por defecto `gpt-4o-mini`. |
+| `OPENAI_BASE_URL` | URL base de OpenAI. Por defecto `https://api.openai.com/v1`. |
 
 Los archivos `backend/.env` y `frontend/.env` no se versionan.
 
@@ -236,9 +239,12 @@ MONGODB_URI=tu_cadena_de_atlas
 MONGODB_DB=dunklabs
 SESSION_SECRET=generada_por_render
 FRONTEND_URL=https://dunklabs-web-jc.onrender.com
+OPENAI_API_KEY=tu_clave_de_openai
+OPENAI_MODEL=gpt-4o-mini
+OPENAI_BASE_URL=https://api.openai.com/v1
 ```
 
-`FRONTEND_URL` debe ser la URL exacta del frontend, sin `/` al final.
+`FRONTEND_URL` debe ser la URL exacta del frontend, sin `/` al final. `OPENAI_API_KEY` se configura como secreto en Render (`sync: false` en `render.yaml`); no la pongas en el frontend ni en variables `VITE_*`.
 
 ### 4. Variables del frontend
 
@@ -295,6 +301,10 @@ Prueba registro, login de cliente, login de admin y un pedido.
 - El Static Site sigue disponible aunque el backend esté dormido; las llamadas a la API despertarán el backend.
 
 No subas `backend/.env` ni `frontend/.env` a Git. Los secretos se configuran en Render.
+
+## DunkBot
+
+DunkBot es el asistente flotante de inicio, catálogo y cuenta. Usa `POST /api/chat` con un historial máximo de 8 mensajes y responde con texto y productos sugeridos. La búsqueda consulta todo el catálogo en MongoDB, incluye productos agotados en el contexto y solo muestra tarjetas de productos con stock disponible. El historial de conversación vive en memoria del navegador; no se guarda en MongoDB.
 
 ## Notas de la migración
 
