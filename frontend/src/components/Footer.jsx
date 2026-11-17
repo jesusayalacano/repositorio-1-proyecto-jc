@@ -10,7 +10,7 @@ export default function Footer({ id, enCatalogo = false }) {
         </div>
         <div className="footer-contacto">
           <p className="footer-titulo">Contacto</p>
-          <p>Bogotá, Colombia</p>
+          <p>Barranquilla, Colombia</p>
           <p>
             <a href={`${prefijo}contacto`}>Escríbenos</a>
           </p>

@@ -1,7 +1,7 @@
 export default function Hero() {
   return (
     <section id="hero">
-      <p className="eyebrow">Baloncesto · Bogotá</p>
+      <p className="eyebrow">Baloncesto · Barranquilla</p>
       <h2>
         Equípate para <span className="acento">dominar</span> la cancha
       </h2>
